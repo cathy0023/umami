@@ -76,6 +76,31 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
         },
       },
     },
+    animation: {
+      onComplete: function (this: any) {
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 14px Arial';
+
+        this.data.datasets.forEach((dataset: any, datasetIndex: number) => {
+          const meta = this.getDatasetMeta(datasetIndex);
+          if (!meta.hidden) {
+            meta.data.forEach((bar: any, index: number) => {
+              const value = dataset.data[index].y;
+              if (value > 0) {
+                const x = bar.x;
+                const y = bar.y + bar.height / 2;
+                ctx.fillText(value.toString(), x, y);
+              }
+            });
+          }
+        });
+        ctx.restore();
+      },
+    },
   };
 
   const handleRowClick = row => {
@@ -132,41 +157,6 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                   tooltip={tooltip}
                   onTooltip={handleTooltip}
                   chartOptions={chartOptions}
-                  onCreate={(chart: any) => {
-                    // 注册自定义插件来显示数值
-                    const dataLabelsPlugin = {
-                      id: 'dataLabels',
-                      afterDatasetsDraw: (chart: any) => {
-                        const ctx = chart.ctx;
-                        ctx.save();
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillStyle = '#fff';
-                        ctx.font = 'bold 14px Arial';
-
-                        chart.data.datasets.forEach((dataset: any, datasetIndex: number) => {
-                          const meta = chart.getDatasetMeta(datasetIndex);
-                          if (!meta.hidden) {
-                            meta.data.forEach((bar: any, index: number) => {
-                              const value = dataset.data[index].y;
-                              if (value > 0) {
-                                // 将数字放在柱子中间
-                                const x = bar.x;
-                                const y = bar.y + bar.height / 2;
-                                ctx.fillText(value.toString(), x, y);
-                              }
-                            });
-                          }
-                        });
-                        ctx.restore();
-                      },
-                    };
-
-                    // 注册插件
-                    if (!chart.options.plugins.dataLabels) {
-                      chart.register(dataLabelsPlugin);
-                    }
-                  }}
                 />
               </div>
               <div
