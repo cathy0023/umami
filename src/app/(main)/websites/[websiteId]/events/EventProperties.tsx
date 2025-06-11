@@ -1,7 +1,7 @@
 import { GridColumn, GridTable } from 'react-basics';
 import { useEventDataProperties, useEventDataValues, useMessages } from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
-import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 import { useState } from 'react';
 import { CHART_COLORS } from '@/lib/constants';
 import styles from './EventProperties.module.css';
@@ -15,12 +15,16 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
   const chartData =
     propertyName && values
       ? {
-          labels: values.map(({ value }) => value),
           datasets: [
             {
-              data: values.map(({ total }) => total),
-              backgroundColor: CHART_COLORS,
-              borderWidth: 0,
+              label: propertyName,
+              data: values.map(({ value, total }) => ({
+                x: value,
+                y: total,
+              })),
+              backgroundColor: CHART_COLORS[0],
+              borderColor: CHART_COLORS[0],
+              borderWidth: 1,
             },
           ],
         }
@@ -54,7 +58,13 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
         {propertyName && (
           <div className={styles.chart}>
             <div className={styles.title}>{propertyName}</div>
-            <PieChart key={propertyName + eventName} type="doughnut" data={chartData} />
+            <BarChart
+              key={propertyName + eventName}
+              data={chartData}
+              unit="value"
+              XAxisType="category"
+              YAxisType="linear"
+            />
           </div>
         )}
       </div>
