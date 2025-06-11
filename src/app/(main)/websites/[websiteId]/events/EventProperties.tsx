@@ -129,7 +129,7 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
               </div>
               <div
                 style={{
-                  width: '150px',
+                  width: '200px',
                   padding: '15px',
                   backgroundColor: '#f8f9fa',
                   borderRadius: '8px',
@@ -137,7 +137,7 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                 }}
               >
                 <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 'bold' }}>数值</h4>
-                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
                   {values?.map(({ value, total }, index) => (
                     <div
                       key={index}
@@ -154,11 +154,11 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                           fontWeight: '500',
                           marginRight: '8px',
                           wordBreak: 'break-all',
-                          maxWidth: '80px',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
                         }}
+                        title={value}
                       >
                         {value}
                       </span>
