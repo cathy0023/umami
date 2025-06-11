@@ -111,12 +111,7 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
               </div>
             )}
           </GridColumn>
-          <GridColumn
-            name="total"
-            label={formatMessage(labels.count)}
-            alignment="end"
-            style={{ width: '80px' }}
-          />
+          <GridColumn name="total" label={formatMessage(labels.count)} alignment="end" />
         </GridTable>
         {propertyName && (
           <div className={styles.chart}>
