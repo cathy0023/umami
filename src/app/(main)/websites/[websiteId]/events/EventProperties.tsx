@@ -41,6 +41,13 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
       legend: {
         display: false, // 隐藏图例
       },
+      tooltip: {
+        enabled: false, // 禁用默认tooltip
+      },
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index' as const,
     },
     scales: {
       x: {
@@ -111,6 +118,9 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
   const handleTooltip = ({ tooltip: chartTooltip }) => {
     const { opacity, dataPoints } = chartTooltip;
 
+    // eslint-disable-next-line no-console
+    console.log('handleTooltip called:', { opacity, dataPoints });
+
     setTooltip(
       opacity && dataPoints?.length > 0 ? (
         <div style={{ padding: '8px', backgroundColor: 'rgba(0,0,0,0.8)', borderRadius: '4px' }}>
@@ -168,7 +178,9 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                   fontSize: '13px',
                 }}
               >
-                <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 'bold' }}>数值</h4>
+                <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 'bold' }}>
+                  {eventName} （{propertyName}）
+                </h4>
                 <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
                   {values?.map(({ value, total }, index) => (
                     <div
