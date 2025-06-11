@@ -36,35 +36,6 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
         }
       : null;
 
-  // 自定义插件：在柱子上显示数值
-  const dataLabelsPlugin = {
-    id: 'dataLabels',
-    afterDatasetsDraw(chart: any) {
-      const { ctx } = chart;
-
-      chart.data.datasets.forEach((dataset: any, datasetIndex: number) => {
-        const meta = chart.getDatasetMeta(datasetIndex);
-        if (!meta.hidden) {
-          meta.data.forEach((bar: any, index: number) => {
-            const value = dataset.data[index].y;
-
-            ctx.save();
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'bottom';
-            ctx.fillStyle = '#000';
-            ctx.font = 'bold 12px Inter';
-
-            const x = bar.x;
-            const y = bar.y - 5; // 在柱子顶部上方5px处显示
-
-            ctx.fillText(value.toString(), x, y);
-            ctx.restore();
-          });
-        }
-      });
-    },
-  };
-
   const chartOptions = {
     scales: {
       x: {
@@ -100,7 +71,6 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
         },
       },
     },
-    // plugins配置移除，插件在onCreate中注册
   };
 
   const handleRowClick = row => {
@@ -151,20 +121,66 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
         {propertyName && (
           <div className={styles.chart}>
             <div className={styles.title}>{propertyName}</div>
-            <Chart
-              key={propertyName + eventName}
-              type="bar"
-              data={chartData}
-              tooltip={tooltip}
-              onTooltip={handleTooltip}
-              chartOptions={chartOptions}
-              onCreate={chart => {
-                // 注册自定义插件
-                if (!chart.config.plugins.find(p => p.id === 'dataLabels')) {
-                  chart.config.plugins.push(dataLabelsPlugin);
-                }
-              }}
-            />
+            <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <Chart
+                  key={propertyName + eventName}
+                  type="bar"
+                  data={chartData}
+                  tooltip={tooltip}
+                  onTooltip={handleTooltip}
+                  chartOptions={chartOptions}
+                />
+              </div>
+              <div
+                style={{
+                  width: '150px',
+                  padding: '15px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                }}
+              >
+                <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 'bold' }}>数值</h4>
+                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                  {values?.map(({ value, total }, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        padding: '4px 0',
+                        borderBottom: '1px solid #e9ecef',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontWeight: '500',
+                          marginRight: '8px',
+                          wordBreak: 'break-all',
+                          maxWidth: '80px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {value}
+                      </span>
+                      <span
+                        style={{
+                          color: CHART_COLORS[0],
+                          fontWeight: 'bold',
+                          fontSize: '12px',
+                        }}
+                      >
+                        {total}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
