@@ -1,12 +1,13 @@
 .container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  grid-template-columns: 400px 1fr;
   gap: 60px;
   margin-bottom: 40px;
 }
 
 .table {
   align-self: flex-start;
+  width: 400px;
 }
 
 .link:hover {

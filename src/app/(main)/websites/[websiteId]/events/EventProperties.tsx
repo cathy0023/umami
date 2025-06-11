@@ -36,6 +36,35 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
         }
       : null;
 
+  // 自定义插件：在柱子上显示数值
+  const dataLabelsPlugin = {
+    id: 'dataLabels',
+    afterDatasetsDraw(chart: any) {
+      const { ctx } = chart;
+
+      chart.data.datasets.forEach((dataset: any, datasetIndex: number) => {
+        const meta = chart.getDatasetMeta(datasetIndex);
+        if (!meta.hidden) {
+          meta.data.forEach((bar: any, index: number) => {
+            const value = dataset.data[index].y;
+
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 12px Inter';
+
+            const x = bar.x;
+            const y = bar.y - 5; // 在柱子顶部上方5px处显示
+
+            ctx.fillText(value.toString(), x, y);
+            ctx.restore();
+          });
+        }
+      });
+    },
+  };
+
   const chartOptions = {
     scales: {
       x: {
@@ -71,6 +100,7 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
         },
       },
     },
+    // plugins配置移除，插件在onCreate中注册
   };
 
   const handleRowClick = row => {
@@ -111,58 +141,30 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
               </div>
             )}
           </GridColumn>
-          <GridColumn name="total" label={formatMessage(labels.count)} alignment="end" />
+          <GridColumn
+            name="total"
+            label={formatMessage(labels.count)}
+            alignment="end"
+            style={{ width: '80px' }}
+          />
         </GridTable>
         {propertyName && (
           <div className={styles.chart}>
             <div className={styles.title}>{propertyName}</div>
-            <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-              <div style={{ flex: 1, minHeight: '400px' }}>
-                <Chart
-                  key={propertyName + eventName}
-                  type="bar"
-                  data={chartData}
-                  tooltip={tooltip}
-                  onTooltip={handleTooltip}
-                  chartOptions={chartOptions}
-                />
-              </div>
-              <div
-                style={{
-                  width: '200px',
-                  padding: '20px',
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '8px',
-                }}
-              >
-                <h4 style={{ margin: '0 0 15px 0', fontSize: '14px', fontWeight: 'bold' }}>
-                  数值列表
-                </h4>
-                <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
-                  {values?.map(({ value, total }, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        padding: '8px 0',
-                        borderBottom: '1px solid #e9ecef',
-                        fontSize: '13px',
-                      }}
-                    >
-                      <span
-                        style={{ fontWeight: '500', marginRight: '10px', wordBreak: 'break-all' }}
-                      >
-                        {value}
-                      </span>
-                      <span style={{ color: CHART_COLORS[0], fontWeight: 'bold' }}>
-                        {formatLongNumber(total)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <Chart
+              key={propertyName + eventName}
+              type="bar"
+              data={chartData}
+              tooltip={tooltip}
+              onTooltip={handleTooltip}
+              chartOptions={chartOptions}
+              onCreate={chart => {
+                // 注册自定义插件
+                if (!chart.config.plugins.find(p => p.id === 'dataLabels')) {
+                  chart.config.plugins.push(dataLabelsPlugin);
+                }
+              }}
+            />
           </div>
         )}
       </div>
