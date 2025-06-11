@@ -84,29 +84,7 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
       },
     },
     animation: {
-      onComplete: function (this: any) {
-        const ctx = this.ctx;
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 14px Arial';
-
-        this.data.datasets.forEach((dataset: any, datasetIndex: number) => {
-          const meta = this.getDatasetMeta(datasetIndex);
-          if (!meta.hidden) {
-            meta.data.forEach((bar: any, index: number) => {
-              const value = dataset.data[index].y;
-              if (value > 0) {
-                const x = bar.x;
-                const y = bar.y + bar.height / 2;
-                ctx.fillText(value.toString(), x, y);
-              }
-            });
-          }
-        });
-        ctx.restore();
-      },
+      duration: 400, // 缩短动画时间
     },
   };
 
@@ -117,9 +95,6 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
 
   const handleTooltip = ({ tooltip: chartTooltip }) => {
     const { opacity, dataPoints } = chartTooltip;
-
-    // eslint-disable-next-line no-console
-    console.log('handleTooltip called:', { opacity, dataPoints });
 
     setTooltip(
       opacity && dataPoints?.length > 0 ? (
@@ -167,18 +142,96 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                   tooltip={tooltip}
                   onTooltip={handleTooltip}
                   chartOptions={chartOptions}
+                  onCreate={(chart: any) => {
+                    // 注册绘制数字的插件
+                    const drawDataLabels = () => {
+                      const ctx = chart.ctx;
+                      ctx.save();
+                      ctx.textAlign = 'center';
+                      ctx.textBaseline = 'middle';
+                      ctx.fillStyle = '#fff';
+                      ctx.font = 'bold 16px Arial'; // 调大字体
+                      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                      ctx.shadowBlur = 2;
+
+                      chart.data.datasets.forEach((dataset: any, datasetIndex: number) => {
+                        const meta = chart.getDatasetMeta(datasetIndex);
+                        if (!meta.hidden) {
+                          meta.data.forEach((bar: any, index: number) => {
+                            const value = dataset.data[index].y;
+                            if (value > 0) {
+                              const x = bar.x;
+                              const y = bar.y + bar.height / 2;
+                              ctx.fillText(value.toString(), x, y);
+                            }
+                          });
+                        }
+                      });
+                      ctx.restore();
+                    };
+
+                    // 添加自定义插件
+                    chart.options.plugins = chart.options.plugins || {};
+                    chart.options.animation = {
+                      ...chart.options.animation,
+                      onComplete: drawDataLabels,
+                    };
+                  }}
+                  onUpdate={(chart: any) => {
+                    // 确保每次更新时重新绘制数字
+                    const drawDataLabels = () => {
+                      const ctx = chart.ctx;
+                      ctx.save();
+                      ctx.textAlign = 'center';
+                      ctx.textBaseline = 'middle';
+                      ctx.fillStyle = '#fff';
+                      ctx.font = 'bold 16px Arial'; // 调大字体
+                      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                      ctx.shadowBlur = 2;
+
+                      chart.data.datasets.forEach((dataset: any, datasetIndex: number) => {
+                        const meta = chart.getDatasetMeta(datasetIndex);
+                        if (!meta.hidden) {
+                          meta.data.forEach((bar: any, index: number) => {
+                            const value = dataset.data[index].y;
+                            if (value > 0) {
+                              const x = bar.x;
+                              const y = bar.y + bar.height / 2;
+                              ctx.fillText(value.toString(), x, y);
+                            }
+                          });
+                        }
+                      });
+                      ctx.restore();
+                    };
+
+                    chart.options.animation = {
+                      ...chart.options.animation,
+                      onComplete: drawDataLabels,
+                    };
+                  }}
                 />
               </div>
               <div
                 style={{
                   width: '200px',
-                  padding: '15px',
+                  padding: '10px',
                   backgroundColor: '#f8f9fa',
                   borderRadius: '8px',
                   fontSize: '13px',
                 }}
               >
-                <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 'bold' }}>
+                <h4
+                  style={{
+                    margin: '0 0 10px 0',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                  title={eventName + '（' + propertyName + '）'}
+                >
                   {eventName} （{propertyName}）
                 </h4>
                 <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
