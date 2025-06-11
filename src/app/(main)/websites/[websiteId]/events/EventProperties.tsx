@@ -37,6 +37,11 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
       : null;
 
   const chartOptions = {
+    plugins: {
+      legend: {
+        display: false, // 隐藏图例
+      },
+    },
     scales: {
       x: {
         type: 'category' as const,
@@ -115,7 +120,9 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
         </GridTable>
         {propertyName && (
           <div className={styles.chart}>
-            <div className={styles.title}>{propertyName}</div>
+            <div className={styles.title}>
+              {eventName} - {propertyName}
+            </div>
             <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
                 <Chart
@@ -126,17 +133,16 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                   onTooltip={handleTooltip}
                   chartOptions={chartOptions}
                   onCreate={(chart: any) => {
-                    // 添加自定义插件来显示数值
-                    chart.options.plugins = chart.options.plugins || {};
-                    chart.options.animation = {
-                      ...chart.options.animation,
-                      onComplete: () => {
+                    // 注册自定义插件来显示数值
+                    const dataLabelsPlugin = {
+                      id: 'dataLabels',
+                      afterDatasetsDraw: (chart: any) => {
                         const ctx = chart.ctx;
                         ctx.save();
                         ctx.textAlign = 'center';
-                        ctx.textBaseline = 'bottom';
-                        ctx.fillStyle = '#000';
-                        ctx.font = 'bold 12px Arial';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = '#fff';
+                        ctx.font = 'bold 14px Arial';
 
                         chart.data.datasets.forEach((dataset: any, datasetIndex: number) => {
                           const meta = chart.getDatasetMeta(datasetIndex);
@@ -144,7 +150,10 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                             meta.data.forEach((bar: any, index: number) => {
                               const value = dataset.data[index].y;
                               if (value > 0) {
-                                ctx.fillText(value.toString(), bar.x, bar.y - 5);
+                                // 将数字放在柱子中间
+                                const x = bar.x;
+                                const y = bar.y + bar.height / 2;
+                                ctx.fillText(value.toString(), x, y);
                               }
                             });
                           }
@@ -152,30 +161,11 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                         ctx.restore();
                       },
                     };
-                  }}
-                  onUpdate={(chart: any) => {
-                    // 确保每次更新时也重新绘制数值
-                    setTimeout(() => {
-                      const ctx = chart.ctx;
-                      ctx.save();
-                      ctx.textAlign = 'center';
-                      ctx.textBaseline = 'bottom';
-                      ctx.fillStyle = '#000';
-                      ctx.font = 'bold 12px Arial';
 
-                      chart.data.datasets.forEach((dataset: any, datasetIndex: number) => {
-                        const meta = chart.getDatasetMeta(datasetIndex);
-                        if (!meta.hidden) {
-                          meta.data.forEach((bar: any, index: number) => {
-                            const value = dataset.data[index].y;
-                            if (value > 0) {
-                              ctx.fillText(value.toString(), bar.x, bar.y - 5);
-                            }
-                          });
-                        }
-                      });
-                      ctx.restore();
-                    }, 100);
+                    // 注册插件
+                    if (!chart.options.plugins.dataLabels) {
+                      chart.register(dataLabelsPlugin);
+                    }
                   }}
                 />
               </div>
