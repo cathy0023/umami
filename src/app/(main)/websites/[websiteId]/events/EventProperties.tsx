@@ -125,6 +125,58 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                   tooltip={tooltip}
                   onTooltip={handleTooltip}
                   chartOptions={chartOptions}
+                  onCreate={(chart: any) => {
+                    // 添加自定义插件来显示数值
+                    chart.options.plugins = chart.options.plugins || {};
+                    chart.options.animation = {
+                      ...chart.options.animation,
+                      onComplete: () => {
+                        const ctx = chart.ctx;
+                        ctx.save();
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillStyle = '#000';
+                        ctx.font = 'bold 12px Arial';
+
+                        chart.data.datasets.forEach((dataset: any, datasetIndex: number) => {
+                          const meta = chart.getDatasetMeta(datasetIndex);
+                          if (!meta.hidden) {
+                            meta.data.forEach((bar: any, index: number) => {
+                              const value = dataset.data[index].y;
+                              if (value > 0) {
+                                ctx.fillText(value.toString(), bar.x, bar.y - 5);
+                              }
+                            });
+                          }
+                        });
+                        ctx.restore();
+                      },
+                    };
+                  }}
+                  onUpdate={(chart: any) => {
+                    // 确保每次更新时也重新绘制数值
+                    setTimeout(() => {
+                      const ctx = chart.ctx;
+                      ctx.save();
+                      ctx.textAlign = 'center';
+                      ctx.textBaseline = 'bottom';
+                      ctx.fillStyle = '#000';
+                      ctx.font = 'bold 12px Arial';
+
+                      chart.data.datasets.forEach((dataset: any, datasetIndex: number) => {
+                        const meta = chart.getDatasetMeta(datasetIndex);
+                        if (!meta.hidden) {
+                          meta.data.forEach((bar: any, index: number) => {
+                            const value = dataset.data[index].y;
+                            if (value > 0) {
+                              ctx.fillText(value.toString(), bar.x, bar.y - 5);
+                            }
+                          });
+                        }
+                      });
+                      ctx.restore();
+                    }, 100);
+                  }}
                 />
               </div>
               <div
