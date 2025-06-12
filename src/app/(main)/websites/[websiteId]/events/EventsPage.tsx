@@ -5,23 +5,50 @@ import EventsMetricsBar from './EventsMetricsBar';
 import EventsChart from '@/components/metrics/EventsChart';
 import { GridRow } from '@/components/layout/Grid';
 import EventsTable from '@/components/metrics/EventsTable';
-import { useMessages } from '@/components/hooks';
+import { useMessages, useNavigation } from '@/components/hooks';
 import { Item, Tabs } from 'react-basics';
 import { useState } from 'react';
 import EventProperties from './EventProperties';
+import FilterTags from '@/components/metrics/FilterTags';
+import WebsiteFilterButton from '../WebsiteFilterButton';
+import { FILTER_COLUMNS } from '@/lib/constants';
 
 export default function EventsPage({ websiteId }) {
   const [label, setLabel] = useState(null);
   const [tab, setTab] = useState('activity');
+  const [propertyName, setPropertyName] = useState('');
   const { formatMessage, labels } = useMessages();
+  const { query } = useNavigation();
+
+  // 获取筛选参数
+  const params = Object.keys(query).reduce((obj, key) => {
+    if (FILTER_COLUMNS[key]) {
+      obj[key] = query[key];
+    }
+    return obj;
+  }, {});
 
   const handleLabelClick = (value: string) => {
     setLabel(value !== label ? value : '');
   };
 
+  // 判断是否显示筛选器：只在Properties标签页且选择了非org_name属性时显示
+  const shouldShowFilter = tab === 'properties' && propertyName && propertyName !== 'org_name';
+
+  // 创建筛选器组件
+  const filterComponent = shouldShowFilter && (
+    <>
+      {Object.keys(params).filter(key => params[key]).length > 0 ? (
+        <FilterTags websiteId={websiteId} params={params} />
+      ) : (
+        <WebsiteFilterButton websiteId={websiteId} alignment="end" showText={true} />
+      )}
+    </>
+  );
+
   return (
     <>
-      <WebsiteHeader websiteId={websiteId} />
+      <WebsiteHeader websiteId={websiteId}>{filterComponent}</WebsiteHeader>
       <EventsMetricsBar websiteId={websiteId} />
       <GridRow columns="two-one">
         <EventsChart websiteId={websiteId} focusLabel={label} />
@@ -43,7 +70,9 @@ export default function EventsPage({ websiteId }) {
           <Item key="properties">{formatMessage(labels.properties)}</Item>
         </Tabs>
         {tab === 'activity' && <EventsDataTable websiteId={websiteId} />}
-        {tab === 'properties' && <EventProperties websiteId={websiteId} />}
+        {tab === 'properties' && (
+          <EventProperties websiteId={websiteId} onPropertyChange={setPropertyName} />
+        )}
       </div>
     </>
   );

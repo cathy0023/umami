@@ -1,39 +1,29 @@
 import { GridColumn, GridTable } from 'react-basics';
-import {
-  useEventDataProperties,
-  useEventDataValues,
-  useMessages,
-  useNavigation,
-} from '@/components/hooks';
+import { useEventDataProperties, useEventDataValues, useMessages } from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import Chart from '@/components/charts/Chart';
 import { useState } from 'react';
-import { CHART_COLORS, FILTER_COLUMNS } from '@/lib/constants';
+import { CHART_COLORS } from '@/lib/constants';
 import { formatLongNumber } from '@/lib/format';
-import FilterTags from '@/components/metrics/FilterTags';
-import WebsiteFilterButton from '@/app/(main)/websites/[websiteId]/WebsiteFilterButton';
 
 import { useTheme } from '@/components/hooks';
 import styles from './EventProperties.module.css';
 
-export function EventProperties({ websiteId }: { websiteId: string }) {
+export function EventProperties({
+  websiteId,
+  onPropertyChange,
+}: {
+  websiteId: string;
+  onPropertyChange?: (propertyName: string) => void;
+}) {
   const [propertyName, setPropertyName] = useState('');
   const [eventName, setEventName] = useState('');
   const [tooltip, setTooltip] = useState(null);
   const [viewMode, setViewMode] = useState<'chart' | 'list'>('chart');
   const { formatMessage, labels } = useMessages();
   const { colors } = useTheme();
-  const { query } = useNavigation();
   const { data, isLoading, isFetched, error } = useEventDataProperties(websiteId);
   const { data: values } = useEventDataValues(websiteId, eventName, propertyName);
-
-  // 获取筛选参数
-  const params = Object.keys(query).reduce((obj, key) => {
-    if (FILTER_COLUMNS[key]) {
-      obj[key] = query[key];
-    }
-    return obj;
-  }, {});
 
   const chartData =
     propertyName && values
@@ -109,6 +99,7 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
   const handleRowClick = row => {
     setEventName(row.eventName);
     setPropertyName(row.propertyName);
+    onPropertyChange?.(row.propertyName);
   };
 
   const handleTooltip = ({ tooltip: chartTooltip }) => {
@@ -126,23 +117,8 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
     );
   };
 
-  // 判断是否需要显示tag筛选功能
-  const shouldShowTagFilter = propertyName && propertyName !== 'org_name';
-
   return (
     <LoadingPanel isLoading={isLoading} isFetched={isFetched} data={data} error={error}>
-      {shouldShowTagFilter && (
-        <div className={styles.filterSection}>
-          {Object.keys(params).filter(key => params[key]).length > 0 ? (
-            <FilterTags websiteId={websiteId} params={params} />
-          ) : (
-            <div className={styles.filters}>
-              <div className={styles.label}>{formatMessage(labels.filters)}</div>
-              <WebsiteFilterButton websiteId={websiteId} alignment="center" showText={true} />
-            </div>
-          )}
-        </div>
-      )}
       <div className={styles.container}>
         <GridTable data={data} cardMode={false} className={styles.table}>
           <GridColumn name="eventName" label={formatMessage(labels.name)}>
