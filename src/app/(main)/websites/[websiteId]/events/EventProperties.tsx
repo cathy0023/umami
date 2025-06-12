@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { CHART_COLORS, FILTER_COLUMNS } from '@/lib/constants';
 import { formatLongNumber } from '@/lib/format';
 import FilterTags from '@/components/metrics/FilterTags';
+import WebsiteFilterButton from '@/app/(main)/websites/[websiteId]/WebsiteFilterButton';
 
 import { useTheme } from '@/components/hooks';
 import styles from './EventProperties.module.css';
@@ -132,7 +133,14 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
     <LoadingPanel isLoading={isLoading} isFetched={isFetched} data={data} error={error}>
       {shouldShowTagFilter && (
         <div className={styles.filterSection}>
-          <FilterTags websiteId={websiteId} params={params} />
+          {Object.keys(params).filter(key => params[key]).length > 0 ? (
+            <FilterTags websiteId={websiteId} params={params} />
+          ) : (
+            <div className={styles.filters}>
+              <div className={styles.label}>{formatMessage(labels.filters)}</div>
+              <WebsiteFilterButton websiteId={websiteId} alignment="center" showText={true} />
+            </div>
+          )}
         </div>
       )}
       <div className={styles.container}>
