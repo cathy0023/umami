@@ -13,6 +13,7 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
   const [propertyName, setPropertyName] = useState('');
   const [eventName, setEventName] = useState('');
   const [tooltip, setTooltip] = useState(null);
+  const [viewMode, setViewMode] = useState<'chart' | 'list'>('chart');
   const { formatMessage, labels } = useMessages();
   const { colors } = useTheme();
   const { data, isLoading, isFetched, error } = useEventDataProperties(websiteId);
@@ -130,11 +131,28 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
         </GridTable>
         {propertyName && (
           <div className={styles.chart}>
-            <div className={styles.title}>
-              {eventName} （{propertyName}）
+            <div className={styles.header}>
+              <div className={styles.title}>
+                {eventName} （{propertyName}）
+              </div>
+              <div className={styles.toggleButtons}>
+                <button
+                  className={`${styles.toggleButton} ${viewMode === 'chart' ? styles.active : ''}`}
+                  onClick={() => setViewMode('chart')}
+                >
+                  柱状图
+                </button>
+                <button
+                  className={`${styles.toggleButton} ${viewMode === 'list' ? styles.active : ''}`}
+                  onClick={() => setViewMode('list')}
+                >
+                  列表
+                </button>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-              <div style={{ flex: 1 }}>
+
+            {viewMode === 'chart' ? (
+              <div style={{ width: '100%' }}>
                 <Chart
                   key={propertyName + eventName}
                   type="bar"
@@ -143,14 +161,13 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                   onTooltip={handleTooltip}
                   chartOptions={chartOptions}
                   onCreate={(chart: any) => {
-                    // 注册绘制数字的插件
                     const drawDataLabels = () => {
                       const ctx = chart.ctx;
                       ctx.save();
                       ctx.textAlign = 'center';
                       ctx.textBaseline = 'middle';
                       ctx.fillStyle = '#fff';
-                      ctx.font = 'bold 16px Arial'; // 调大字体
+                      ctx.font = 'bold 16px Arial';
                       ctx.shadowColor = 'rgba(0,0,0,0.5)';
                       ctx.shadowBlur = 2;
 
@@ -170,7 +187,6 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                       ctx.restore();
                     };
 
-                    // 添加自定义插件
                     chart.options.plugins = chart.options.plugins || {};
                     chart.options.animation = {
                       ...chart.options.animation,
@@ -178,14 +194,13 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                     };
                   }}
                   onUpdate={(chart: any) => {
-                    // 确保每次更新时重新绘制数字
                     const drawDataLabels = () => {
                       const ctx = chart.ctx;
                       ctx.save();
                       ctx.textAlign = 'center';
                       ctx.textBaseline = 'middle';
                       ctx.fillStyle = '#fff';
-                      ctx.font = 'bold 16px Arial'; // 调大字体
+                      ctx.font = 'bold 16px Arial';
                       ctx.shadowColor = 'rgba(0,0,0,0.5)';
                       ctx.shadowBlur = 2;
 
@@ -212,67 +227,26 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
                   }}
                 />
               </div>
-              <div
-                style={{
-                  width: '200px',
-                  padding: '10px',
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                }}
-              >
-                <h4
-                  style={{
-                    margin: '0 0 10px 0',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                  title={eventName + '（' + propertyName + '）'}
-                >
-                  {eventName} （{propertyName}）
-                </h4>
-                <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
-                  {values?.map(({ value, total }, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        padding: '4px 0',
-                        borderBottom: '1px solid #e9ecef',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontWeight: '500',
-                          marginRight: '8px',
-                          wordBreak: 'break-all',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                        title={value}
-                      >
-                        {value}
-                      </span>
-                      <span
-                        style={{
-                          color: CHART_COLORS[0],
-                          fontWeight: 'bold',
-                          fontSize: '12px',
-                        }}
-                      >
-                        {total}
-                      </span>
-                    </div>
-                  ))}
+            ) : (
+              <div className={styles.listView}>
+                <div className={styles.listContainer}>
+                  <div className={styles.listHeader}>
+                    <div className={styles.listHeaderItem}>属性值</div>
+                    <div className={styles.listHeaderCount}>数量</div>
+                  </div>
+                  <div className={styles.listBody}>
+                    {values?.map(({ value, total }, index) => (
+                      <div key={index} className={styles.listRow}>
+                        <div className={styles.listValue} title={value}>
+                          {value}
+                        </div>
+                        <div className={styles.listCount}>{total}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>

@@ -15,12 +15,112 @@
   color: var(--primary400);
 }
 
-.title {
-  text-align: center;
-  font-weight: bold;
-  margin: 20px 0;
-}
-
 .chart {
   min-height: 620px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.toggleButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.toggleButton {
+  padding: 8px 16px;
+  border: 1px solid var(--base300);
+  background: var(--base50);
+  color: var(--base700);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.toggleButton:hover {
+  background: var(--base100);
+  border-color: var(--base400);
+}
+
+.toggleButton.active {
+  background: var(--primary400);
+  border-color: var(--primary400);
+  color: white;
+}
+
+.listView {
+  width: 100%;
+}
+
+.listContainer {
+  border: 1px solid var(--base300);
+  border-radius: 8px;
+  background: var(--base50);
+  overflow: hidden;
+}
+
+.listHeader {
+  display: flex;
+  background: var(--base100);
+  border-bottom: 1px solid var(--base300);
+  font-weight: bold;
+  padding: 12px 16px;
+}
+
+.listHeaderItem {
+  flex: 1;
+  color: var(--base700);
+}
+
+.listHeaderCount {
+  width: 100px;
+  text-align: right;
+  color: var(--base700);
+}
+
+.listBody {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.listRow {
+  display: flex;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--base200);
+  align-items: center;
+}
+
+.listRow:hover {
+  background: var(--base75);
+}
+
+.listRow:last-child {
+  border-bottom: none;
+}
+
+.listValue {
+  flex: 1;
+  font-weight: 500;
+  overflow: hidden;
+  word-break: break-all;
+  padding-right: 12px;
+}
+
+.listCount {
+  width: 100px;
+  text-align: right;
+  color: var(--primary400);
+  font-weight: bold;
+  font-size: 14px;
 }
