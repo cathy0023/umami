@@ -1,8 +1,9 @@
 import { z } from 'zod';
-import { parseRequest } from '@/lib/request';
+import { parseRequest, getRequestFilters } from '@/lib/request';
 import { unauthorized, json } from '@/lib/response';
 import { canViewWebsite } from '@/lib/auth';
 import { getEventDataValues } from '@/queries';
+import { filterParams } from '@/lib/schema';
 
 export async function GET(
   request: Request,
@@ -13,6 +14,7 @@ export async function GET(
     endAt: z.coerce.number().int(),
     eventName: z.string().optional(),
     propertyName: z.string().optional(),
+    ...filterParams,
   });
 
   const { auth, query, error } = await parseRequest(request, schema);
@@ -36,6 +38,7 @@ export async function GET(
     endDate,
     eventName,
     propertyName,
+    ...getRequestFilters(query),
   });
 
   return json(data);

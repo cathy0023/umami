@@ -1,8 +1,9 @@
 import { z } from 'zod';
-import { parseRequest } from '@/lib/request';
+import { parseRequest, getRequestFilters } from '@/lib/request';
 import { unauthorized, json } from '@/lib/response';
 import { canViewWebsite } from '@/lib/auth';
 import { getEventDataProperties } from '@/queries';
+import { filterParams } from '@/lib/schema';
 
 export async function GET(
   request: Request,
@@ -12,6 +13,7 @@ export async function GET(
     startAt: z.coerce.number().int(),
     endAt: z.coerce.number().int(),
     propertyName: z.string().optional(),
+    ...filterParams,
   });
 
   const { auth, query, error } = await parseRequest(request, schema);
@@ -30,7 +32,12 @@ export async function GET(
   const startDate = new Date(+startAt);
   const endDate = new Date(+endAt);
 
-  const data = await getEventDataProperties(websiteId, { startDate, endDate, propertyName });
+  const data = await getEventDataProperties(websiteId, {
+    startDate,
+    endDate,
+    propertyName,
+    ...getRequestFilters(query),
+  });
 
   return json(data);
 }
