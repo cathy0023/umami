@@ -32,6 +32,7 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
               backgroundColor: CHART_COLORS[0],
               borderColor: CHART_COLORS[0],
               borderWidth: 1,
+              maxBarThickness: 40, // 设置柱子最大宽度为40px
             },
           ],
         }
