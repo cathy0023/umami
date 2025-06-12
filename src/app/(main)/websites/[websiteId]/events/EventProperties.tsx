@@ -1,10 +1,16 @@
 import { GridColumn, GridTable } from 'react-basics';
-import { useEventDataProperties, useEventDataValues, useMessages } from '@/components/hooks';
+import {
+  useEventDataProperties,
+  useEventDataValues,
+  useMessages,
+  useNavigation,
+} from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import Chart from '@/components/charts/Chart';
 import { useState } from 'react';
-import { CHART_COLORS } from '@/lib/constants';
+import { CHART_COLORS, FILTER_COLUMNS } from '@/lib/constants';
 import { formatLongNumber } from '@/lib/format';
+import FilterTags from '@/components/metrics/FilterTags';
 
 import { useTheme } from '@/components/hooks';
 import styles from './EventProperties.module.css';
@@ -16,8 +22,17 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
   const [viewMode, setViewMode] = useState<'chart' | 'list'>('chart');
   const { formatMessage, labels } = useMessages();
   const { colors } = useTheme();
+  const { query } = useNavigation();
   const { data, isLoading, isFetched, error } = useEventDataProperties(websiteId);
   const { data: values } = useEventDataValues(websiteId, eventName, propertyName);
+
+  // 获取筛选参数
+  const params = Object.keys(query).reduce((obj, key) => {
+    if (FILTER_COLUMNS[key]) {
+      obj[key] = query[key];
+    }
+    return obj;
+  }, {});
 
   const chartData =
     propertyName && values
@@ -110,8 +125,16 @@ export function EventProperties({ websiteId }: { websiteId: string }) {
     );
   };
 
+  // 判断是否需要显示tag筛选功能
+  const shouldShowTagFilter = propertyName && propertyName !== 'org_name';
+
   return (
     <LoadingPanel isLoading={isLoading} isFetched={isFetched} data={data} error={error}>
+      {shouldShowTagFilter && (
+        <div className={styles.filterSection}>
+          <FilterTags websiteId={websiteId} params={params} />
+        </div>
+      )}
       <div className={styles.container}>
         <GridTable data={data} cardMode={false} className={styles.table}>
           <GridColumn name="eventName" label={formatMessage(labels.name)}>

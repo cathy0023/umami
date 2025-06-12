@@ -5,6 +5,10 @@
   margin-bottom: 40px;
 }
 
+.filterSection {
+  margin-bottom: 20px;
+}
+
 .table {
   align-self: flex-start;
   width: 400px;
