@@ -18,7 +18,6 @@ export function EventProperties({
 }) {
   const [propertyName, setPropertyName] = useState('');
   const [eventName, setEventName] = useState('');
-  const [tooltip, setTooltip] = useState(null);
   const [viewMode, setViewMode] = useState<'chart' | 'list'>('chart');
   // 分页相关状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,22 +34,6 @@ export function EventProperties({
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentPageData = values?.slice(startIndex, endIndex) || [];
-
-  // Tooltip处理函数
-  const handleTooltip = ({ tooltip: chartTooltip }) => {
-    const { opacity, dataPoints } = chartTooltip;
-
-    setTooltip(
-      opacity && dataPoints?.length > 0 ? (
-        <div className={styles.tooltip}>
-          <div className={styles.tooltipLine}>
-            {propertyName}: {dataPoints[0].raw.x}
-          </div>
-          <div className={styles.tooltipLine}>次数: {formatLongNumber(dataPoints[0].raw.y)}</div>
-        </div>
-      ) : null,
-    );
-  };
 
   const chartData =
     propertyName && currentPageData.length > 0
@@ -77,8 +60,31 @@ export function EventProperties({
         display: false, // 隐藏图例
       },
       tooltip: {
-        enabled: false, // 禁用默认tooltip，使用自定义tooltip
-        external: handleTooltip, // 使用外部tooltip处理函数
+        enabled: true, // 启用内置tooltip
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        titleColor: 'white',
+        bodyColor: 'white',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderWidth: 1,
+        cornerRadius: 8,
+        padding: 12,
+        bodyFont: {
+          size: 14,
+        },
+        titleFont: {
+          size: 14,
+        },
+        callbacks: {
+          title: function () {
+            return ''; // 不显示标题
+          },
+          label: function (context) {
+            return [
+              `${propertyName}: ${context.raw.x}`,
+              `次数: ${formatLongNumber(context.raw.y)}`,
+            ];
+          },
+        },
       },
     },
     interaction: {
@@ -198,8 +204,6 @@ export function EventProperties({
                   key={propertyName + eventName + currentPage}
                   type="bar"
                   data={chartData}
-                  tooltip={tooltip}
-                  onTooltip={handleTooltip}
                   chartOptions={chartOptions}
                   onCreate={(chart: any) => {
                     const drawDataLabels = () => {
