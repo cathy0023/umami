@@ -22,7 +22,7 @@ export function EventProperties({
   const [viewMode, setViewMode] = useState<'chart' | 'list'>('chart');
   // 分页相关状态
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
+  const [itemsPerPage, setItemsPerPage] = useState(25);
 
   const { formatMessage, labels } = useMessages();
   const { colors } = useTheme();
@@ -140,6 +140,12 @@ export function EventProperties({
 
   const handlePageClick = (page: number) => {
     setCurrentPage(page);
+  };
+
+  // 处理每页条数变化
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // 重置到第一页
   };
 
   return (
@@ -282,56 +288,77 @@ export function EventProperties({
             )}
 
             {/* 分页控制 */}
-            {totalPages > 1 && (
+            {totalItems > 0 && (
               <div className={styles.pagination}>
-                <div className={styles.paginationInfo}>
-                  显示第 {startIndex + 1}-{Math.min(endIndex, totalItems)} 项，共 {totalItems} 项
-                </div>
-                <div className={styles.paginationControls}>
-                  <button
-                    className={styles.paginationButton}
-                    onClick={handlePrevPage}
-                    disabled={currentPage === 1}
-                  >
-                    上一页
-                  </button>
-
-                  {/* 页码显示 */}
-                  <div className={styles.pageNumbers}>
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum;
-                      if (totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNum = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = currentPage - 2 + i;
-                      }
-
-                      return (
-                        <button
-                          key={pageNum}
-                          className={`${styles.pageNumber} ${
-                            currentPage === pageNum ? styles.active : ''
-                          }`}
-                          onClick={() => handlePageClick(pageNum)}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
+                <div className={styles.paginationLeft}>
+                  <div className={styles.paginationInfo}>
+                    显示第 {startIndex + 1}-{Math.min(endIndex, totalItems)} 项，共 {totalItems} 项
                   </div>
-
-                  <button
-                    className={styles.paginationButton}
-                    onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
-                  >
-                    下一页
-                  </button>
+                  <div className={styles.itemsPerPageSelector}>
+                    <span>每页显示：</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={e => handleItemsPerPageChange(Number(e.target.value))}
+                      className={styles.itemsPerPageSelect}
+                    >
+                      <option value={20}>20</option>
+                      <option value={25}>25</option>
+                      <option value={30}>30</option>
+                      <option value={35}>35</option>
+                      <option value={40}>40</option>
+                      <option value={45}>45</option>
+                      <option value={50}>50</option>
+                    </select>
+                    <span>条</span>
+                  </div>
                 </div>
+                {totalPages > 1 && (
+                  <div className={styles.paginationControls}>
+                    <button
+                      className={styles.paginationButton}
+                      onClick={handlePrevPage}
+                      disabled={currentPage === 1}
+                    >
+                      上一页
+                    </button>
+
+                    {/* 页码显示 */}
+                    <div className={styles.pageNumbers}>
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum;
+                        if (totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+
+                        return (
+                          <button
+                            key={pageNum}
+                            className={`${styles.pageNumber} ${
+                              currentPage === pageNum ? styles.active : ''
+                            }`}
+                            onClick={() => handlePageClick(pageNum)}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      className={styles.paginationButton}
+                      onClick={handleNextPage}
+                      disabled={currentPage === totalPages}
+                    >
+                      下一页
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

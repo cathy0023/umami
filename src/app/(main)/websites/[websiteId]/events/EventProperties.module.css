@@ -155,9 +155,43 @@
   border-top: 1px solid var(--base300);
 }
 
+.paginationLeft {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .paginationInfo {
   color: var(--base600);
   font-size: 14px;
+}
+
+.itemsPerPageSelector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--base600);
+  font-size: 14px;
+}
+
+.itemsPerPageSelect {
+  padding: 4px 8px;
+  border: 1px solid var(--base300);
+  background: var(--base50);
+  color: var(--base700);
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+}
+
+.itemsPerPageSelect:hover {
+  border-color: var(--primary400);
+}
+
+.itemsPerPageSelect:focus {
+  border-color: var(--primary400);
+  box-shadow: 0 0 0 2px rgba(var(--primary400-rgb), 0.1);
 }
 
 .paginationControls {
