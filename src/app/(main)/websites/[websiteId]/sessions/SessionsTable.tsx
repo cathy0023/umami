@@ -19,6 +19,7 @@ export function SessionsTable({ data = [] }: { data: any[]; showDomain?: boolean
           </Link>
         )}
       </GridColumn>
+
       <GridColumn name="visits" label={formatMessage(labels.visits)} width="100px" />
       <GridColumn name="views" label={formatMessage(labels.views)} width="100px" />
       <GridColumn name="country" label={formatMessage(labels.country)}>
