@@ -35,20 +35,33 @@ export default function EventsPage({ websiteId }) {
   // 判断是否显示筛选器：只在Properties标签页且选择了非org_name属性时显示
   const shouldShowFilter = tab === 'properties' && propertyName && propertyName !== 'org_name';
 
-  // 创建筛选器组件
-  const filterComponent = shouldShowFilter && (
-    <>
-      {Object.keys(params).filter(key => params[key]).length > 0 ? (
-        <FilterTags websiteId={websiteId} params={params} />
-      ) : (
-        <WebsiteFilterButton websiteId={websiteId} alignment="end" showText={true} />
-      )}
-    </>
-  );
-
   return (
     <>
-      <WebsiteHeader websiteId={websiteId}>{filterComponent}</WebsiteHeader>
+      <WebsiteHeader websiteId={websiteId} />
+      {shouldShowFilter && (
+        <>
+          {Object.keys(params).filter(key => params[key]).length > 0 ? (
+            <FilterTags websiteId={websiteId} params={params} />
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                background: 'var(--base75)',
+                padding: '10px 20px',
+                border: '1px solid var(--base400)',
+                borderRadius: '8px',
+                marginBottom: '20px',
+                flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ fontWeight: 700 }}>{formatMessage(labels.filters)}</div>
+              <WebsiteFilterButton websiteId={websiteId} alignment="center" showText={true} />
+            </div>
+          )}
+        </>
+      )}
       <EventsMetricsBar websiteId={websiteId} />
       <GridRow columns="two-one">
         <EventsChart websiteId={websiteId} focusLabel={label} />
