@@ -20,18 +20,29 @@ export function EventProperties({
   const [eventName, setEventName] = useState('');
   const [tooltip, setTooltip] = useState(null);
   const [viewMode, setViewMode] = useState<'chart' | 'list'>('chart');
+  // 分页相关状态
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
   const { formatMessage, labels } = useMessages();
   const { colors } = useTheme();
   const { data, isLoading, isFetched, error } = useEventDataProperties(websiteId);
   const { data: values } = useEventDataValues(websiteId, eventName, propertyName);
 
+  // 计算分页数据
+  const totalItems = values?.length || 0;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPageData = values?.slice(startIndex, endIndex) || [];
+
   const chartData =
-    propertyName && values
+    propertyName && currentPageData.length > 0
       ? {
           datasets: [
             {
               label: propertyName,
-              data: values.map(({ value, total }) => ({
+              data: currentPageData.map(({ value, total }) => ({
                 x: value,
                 y: total,
               })),
@@ -99,6 +110,7 @@ export function EventProperties({
   const handleRowClick = row => {
     setEventName(row.eventName);
     setPropertyName(row.propertyName);
+    setCurrentPage(1); // 重置到第一页
     onPropertyChange?.(row.propertyName);
   };
 
@@ -115,6 +127,19 @@ export function EventProperties({
         </div>
       ) : null,
     );
+  };
+
+  // 分页控制函数
+  const handlePrevPage = () => {
+    setCurrentPage(prev => Math.max(1, prev - 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(totalPages, prev + 1));
+  };
+
+  const handlePageClick = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -162,7 +187,7 @@ export function EventProperties({
             {viewMode === 'chart' ? (
               <div style={{ width: '100%' }}>
                 <Chart
-                  key={propertyName + eventName}
+                  key={propertyName + eventName + currentPage}
                   type="bar"
                   data={chartData}
                   tooltip={tooltip}
@@ -243,7 +268,7 @@ export function EventProperties({
                     <div className={styles.listHeaderCount}>数量</div>
                   </div>
                   <div className={styles.listBody}>
-                    {values?.map(({ value, total }, index) => (
+                    {currentPageData?.map(({ value, total }, index) => (
                       <div key={index} className={styles.listRow}>
                         <div className={styles.listValue} title={value}>
                           {value}
@@ -252,6 +277,60 @@ export function EventProperties({
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* 分页控制 */}
+            {totalPages > 1 && (
+              <div className={styles.pagination}>
+                <div className={styles.paginationInfo}>
+                  显示第 {startIndex + 1}-{Math.min(endIndex, totalItems)} 项，共 {totalItems} 项
+                </div>
+                <div className={styles.paginationControls}>
+                  <button
+                    className={styles.paginationButton}
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 1}
+                  >
+                    上一页
+                  </button>
+
+                  {/* 页码显示 */}
+                  <div className={styles.pageNumbers}>
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <button
+                          key={pageNum}
+                          className={`${styles.pageNumber} ${
+                            currentPage === pageNum ? styles.active : ''
+                          }`}
+                          onClick={() => handlePageClick(pageNum)}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    className={styles.paginationButton}
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                  >
+                    下一页
+                  </button>
                 </div>
               </div>
             )}
