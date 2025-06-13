@@ -36,6 +36,22 @@ export function EventProperties({
   const endIndex = startIndex + itemsPerPage;
   const currentPageData = values?.slice(startIndex, endIndex) || [];
 
+  // Tooltip处理函数
+  const handleTooltip = ({ tooltip: chartTooltip }) => {
+    const { opacity, dataPoints } = chartTooltip;
+
+    setTooltip(
+      opacity && dataPoints?.length > 0 ? (
+        <div className={styles.tooltip}>
+          <div className={styles.tooltipLine}>
+            {propertyName}: {dataPoints[0].raw.x}
+          </div>
+          <div className={styles.tooltipLine}>次数: {formatLongNumber(dataPoints[0].raw.y)}</div>
+        </div>
+      ) : null,
+    );
+  };
+
   const chartData =
     propertyName && currentPageData.length > 0
       ? {
@@ -61,7 +77,8 @@ export function EventProperties({
         display: false, // 隐藏图例
       },
       tooltip: {
-        enabled: false, // 禁用默认tooltip
+        enabled: false, // 禁用默认tooltip，使用自定义tooltip
+        external: handleTooltip, // 使用外部tooltip处理函数
       },
     },
     interaction: {
@@ -112,21 +129,6 @@ export function EventProperties({
     setPropertyName(row.propertyName);
     setCurrentPage(1); // 重置到第一页
     onPropertyChange?.(row.propertyName);
-  };
-
-  const handleTooltip = ({ tooltip: chartTooltip }) => {
-    const { opacity, dataPoints } = chartTooltip;
-
-    setTooltip(
-      opacity && dataPoints?.length > 0 ? (
-        <div style={{ padding: '8px', backgroundColor: 'rgba(0,0,0,0.8)', borderRadius: '4px' }}>
-          <div style={{ color: 'white', marginBottom: '4px' }}>
-            {propertyName}: {dataPoints[0].raw.x}
-          </div>
-          <div style={{ color: 'white' }}>count: {formatLongNumber(dataPoints[0].raw.y)}</div>
-        </div>
-      ) : null,
-    );
   };
 
   // 分页控制函数
