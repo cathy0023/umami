@@ -16,7 +16,7 @@ import { FILTER_COLUMNS } from '@/lib/constants';
 export default function EventsPage({ websiteId }) {
   const [label, setLabel] = useState(null);
   const [tab, setTab] = useState('activity');
-  const [propertyName, setPropertyName] = useState('');
+  const [setPropertyName] = useState('');
   const { formatMessage, labels } = useMessages();
   const { query } = useNavigation();
 
@@ -35,7 +35,7 @@ export default function EventsPage({ websiteId }) {
   return (
     <>
       <WebsiteHeader websiteId={websiteId} />
-      {tab === 'properties' && propertyName && propertyName !== 'org_name' && (
+      {
         <>
           {Object.keys(params).filter(key => params[key]).length > 0 ? (
             <FilterTags websiteId={websiteId} params={params} />
@@ -58,7 +58,7 @@ export default function EventsPage({ websiteId }) {
             </div>
           )}
         </>
-      )}
+      }
       <EventsMetricsBar websiteId={websiteId} />
       <GridRow columns="two-one">
         <EventsChart websiteId={websiteId} focusLabel={label} />
