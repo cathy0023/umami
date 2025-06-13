@@ -264,6 +264,7 @@
   backdrop-filter: blur(8px);
   max-width: 300px;
   word-break: break-all;
+  text-align: left;
 }
 
 .tooltipLine {
