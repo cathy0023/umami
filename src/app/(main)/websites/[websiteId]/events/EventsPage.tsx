@@ -32,13 +32,10 @@ export default function EventsPage({ websiteId }) {
     setLabel(value !== label ? value : '');
   };
 
-  // 判断是否显示筛选器：只在Properties标签页且选择了非org_name属性时显示
-  const shouldShowFilter = tab === 'properties' && propertyName && propertyName !== 'org_name';
-
   return (
     <>
       <WebsiteHeader websiteId={websiteId} />
-      {shouldShowFilter && (
+      {tab === 'properties' && propertyName && propertyName !== 'org_name' && (
         <>
           {Object.keys(params).filter(key => params[key]).length > 0 ? (
             <FilterTags websiteId={websiteId} params={params} />
