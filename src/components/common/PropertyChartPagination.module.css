@@ -1,0 +1,108 @@
+/* 分页样式 */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 15px 0;
+  border-top: 1px solid var(--base300);
+}
+
+.paginationLeft {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.paginationInfo {
+  color: var(--base600);
+  font-size: 14px;
+}
+
+.itemsPerPageSelector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--base600);
+  font-size: 14px;
+}
+
+.itemsPerPageSelect {
+  padding: 4px 8px;
+  border: 1px solid var(--base300);
+  background: var(--base50);
+  color: var(--base700);
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+}
+
+.itemsPerPageSelect:hover {
+  border-color: var(--primary400);
+}
+
+.itemsPerPageSelect:focus {
+  border-color: var(--primary400);
+  box-shadow: 0 0 0 2px rgba(var(--primary400-rgb), 0.1);
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.paginationButton {
+  padding: 8px 16px;
+  border: 1px solid var(--base300);
+  background: var(--base50);
+  color: var(--base700);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background: var(--base100);
+  border-color: var(--primary400);
+  color: var(--primary400);
+}
+
+.paginationButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageNumbers {
+  display: flex;
+  gap: 4px;
+}
+
+.pageNumber {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--base300);
+  background: var(--base50);
+  color: var(--base700);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.pageNumber:hover:not(.active) {
+  background: var(--base100);
+  border-color: var(--primary400);
+  color: var(--primary400);
+}
+
+.pageNumber.active {
+  background: var(--primary400);
+  border-color: var(--primary400);
+  color: white;
+}

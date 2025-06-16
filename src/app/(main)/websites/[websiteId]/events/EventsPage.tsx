@@ -16,7 +16,7 @@ import { FILTER_COLUMNS } from '@/lib/constants';
 export default function EventsPage({ websiteId }) {
   const [label, setLabel] = useState(null);
   const [tab, setTab] = useState('activity');
-  const [setPropertyName] = useState('');
+  const [propertyName, setPropertyName] = useState('');
   const { formatMessage, labels } = useMessages();
   const { query } = useNavigation();
 
@@ -30,6 +30,12 @@ export default function EventsPage({ websiteId }) {
 
   const handleLabelClick = (value: string) => {
     setLabel(value !== label ? value : '');
+  };
+
+  const handlePropertyChange = (newPropertyName: string) => {
+    /* eslint-disable no-console */
+    console.log('propertyName', propertyName);
+    setPropertyName(newPropertyName);
   };
 
   return (
@@ -81,7 +87,7 @@ export default function EventsPage({ websiteId }) {
         </Tabs>
         {tab === 'activity' && <EventsDataTable websiteId={websiteId} />}
         {tab === 'properties' && (
-          <EventProperties websiteId={websiteId} onPropertyChange={setPropertyName} />
+          <EventProperties websiteId={websiteId} onPropertyChange={handlePropertyChange} />
         )}
       </div>
     </>

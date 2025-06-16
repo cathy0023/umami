@@ -41,6 +41,7 @@ export * from './useMessages';
 export * from './useModified';
 export * from './useNavigation';
 export * from './usePagedQuery';
+export * from './usePropertyChart';
 export * from './useRegionNames';
 export * from './useSticky';
 export * from './useTeamUrl';
