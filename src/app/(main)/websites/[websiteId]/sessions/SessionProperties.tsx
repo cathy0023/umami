@@ -102,19 +102,20 @@ export function SessionProperties({ websiteId }: { websiteId: string }) {
               </div>
             )}
 
-            {/* 分页控制 */}
-            <PropertyChartPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalItems}
-              startIndex={startIndex}
-              endIndex={endIndex}
-              itemsPerPage={itemsPerPage}
-              onPrevPage={handlePrevPage}
-              onNextPage={handleNextPage}
-              onPageClick={handlePageClick}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
+            {data.length > 25 && (
+              <PropertyChartPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                startIndex={startIndex}
+                endIndex={endIndex}
+                itemsPerPage={itemsPerPage}
+                onPrevPage={handlePrevPage}
+                onNextPage={handleNextPage}
+                onPageClick={handlePageClick}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+            )}
           </div>
         )}
       </div>
