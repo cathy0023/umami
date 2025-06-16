@@ -19,7 +19,12 @@ export function SessionsTable({ data = [] }: { data: any[]; showDomain?: boolean
           </Link>
         )}
       </GridColumn>
-
+      <GridColumn name="user_name" label="用户名">
+        {row => row.user_name || '-'}
+      </GridColumn>
+      <GridColumn name="org_name" label="组织名称">
+        {row => row.org_name || '-'}
+      </GridColumn>
       <GridColumn name="visits" label={formatMessage(labels.visits)} width="100px" />
       <GridColumn name="views" label={formatMessage(labels.views)} width="100px" />
       <GridColumn name="country" label={formatMessage(labels.country)}>

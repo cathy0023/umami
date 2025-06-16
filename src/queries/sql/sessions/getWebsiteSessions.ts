@@ -37,6 +37,8 @@ async function relationalQuery(websiteId: string, filters: QueryFilters, pagePar
       session.country,
       session.region,
       session.city,
+      user_name.string_value as "user_name",
+      org_name.string_value as "org_name",
       min(website_event.created_at) as "firstAt",
       max(website_event.created_at) as "lastAt",
       count(distinct website_event.visit_id) as "visits",
@@ -44,6 +46,8 @@ async function relationalQuery(websiteId: string, filters: QueryFilters, pagePar
       max(website_event.created_at) as "createdAt"
     from website_event 
     join session on session.session_id = website_event.session_id
+    left join session_data as user_name on user_name.session_id = session.session_id and user_name.data_key = 'name'
+    left join session_data as org_name on org_name.session_id = session.session_id and org_name.data_key = 'org_name'
     where website_event.website_id = {{websiteId::uuid}}
         and website_event.created_at between {{startDate}} and {{endDate}}
     ${filterQuery}
@@ -66,7 +70,9 @@ async function relationalQuery(websiteId: string, filters: QueryFilters, pagePar
       session.language, 
       session.country, 
       session.region, 
-      session.city
+      session.city,
+      user_name.string_value,
+      org_name.string_value
     order by max(website_event.created_at) desc
     limit 1000)
     select * from sessions
@@ -85,24 +91,36 @@ async function clickhouseQuery(websiteId: string, filters: QueryFilters, pagePar
     `
     with sessions as (
     select
-      session_id as id,
-      website_id as websiteId,
-      hostname,
-      browser,
-      os,
-      device,
-      screen,
-      language,
-      country,
-      region,
-      city,
-      ${getDateStringSQL('min(min_time)')} as firstAt,
-      ${getDateStringSQL('max(max_time)')} as lastAt,
-      uniq(visit_id) as visits,
-      sumIf(views, event_type = 1) as views,
+      s.session_id as id,
+      s.website_id as websiteId,
+      s.hostname,
+      s.browser,
+      s.os,
+      s.device,
+      s.screen,
+      s.language,
+      s.country,
+      s.region,
+      s.city,
+      user_name.string_value as user_name,
+      org_name.string_value as org_name,
+      ${getDateStringSQL('min(s.min_time)')} as firstAt,
+      ${getDateStringSQL('max(s.max_time)')} as lastAt,
+      uniq(s.visit_id) as visits,
+      sumIf(s.views, s.event_type = 1) as views,
       lastAt as createdAt
-    from website_event_stats_hourly
-    where website_id = {websiteId:UUID}
+    from website_event_stats_hourly as s
+    left join (
+      select session_id, string_value
+      from session_data
+      where website_id = {websiteId:UUID} and data_key = 'name'
+    ) as user_name on user_name.session_id = s.session_id
+    left join (
+      select session_id, string_value
+      from session_data
+      where website_id = {websiteId:UUID} and data_key = 'org_name'
+    ) as org_name on org_name.session_id = s.session_id
+    where s.website_id = {websiteId:UUID}
     ${dateQuery}
     ${filterQuery}
     ${
@@ -114,7 +132,7 @@ async function clickhouseQuery(websiteId: string, filters: QueryFilters, pagePar
            or (positionCaseInsensitive(device, {search:String}) > 0))`
         : ''
     }
-    group by session_id, website_id, hostname, browser, os, device, screen, language, country, region, city
+    group by s.session_id, s.website_id, s.hostname, s.browser, s.os, s.device, s.screen, s.language, s.country, s.region, s.city, user_name.string_value, org_name.string_value
     order by lastAt desc
     limit 1000)
     select * from sessions
