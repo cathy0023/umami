@@ -89,7 +89,7 @@ export function usePropertyChart({
             label: function (context: any) {
               return [
                 `${propertyName}: ${context.raw.x}`,
-                `次数: ${formatLongNumber(context.raw.y)}`,
+                `数量: ${formatLongNumber(context.raw.y)}`,
               ];
             },
           },

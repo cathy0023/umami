@@ -25,8 +25,25 @@
   font-weight: 700;
 }
 
+.tableSection {
+  align-self: flex-start;
+}
+
+.searchSection {
+  margin-bottom: 20px;
+}
+
+.searchField {
+  width: 100%;
+  max-width: 300px;
+}
+
 .table {
   align-self: flex-start;
+  max-height: 800px;
+  overflow-y: auto;
+  border: 1px solid var(--base300);
+  border-radius: 8px;
 }
 
 .link:hover {

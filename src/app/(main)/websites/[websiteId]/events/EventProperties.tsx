@@ -2,9 +2,10 @@ import { GridColumn, GridTable } from 'react-basics';
 import { useEventDataProperties, useEventDataValues, useMessages } from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import Chart from '@/components/charts/Chart';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { usePropertyChart } from '@/components/hooks/usePropertyChart';
 import { PropertyChartPagination } from '@/components/common/PropertyChartPagination';
+import { SearchField } from 'react-basics';
 import styles from './EventProperties.module.css';
 
 export function EventProperties({
@@ -16,10 +17,22 @@ export function EventProperties({
 }) {
   const [propertyName, setPropertyName] = useState('');
   const [eventName, setEventName] = useState('');
+  const [search, setSearch] = useState('');
 
   const { formatMessage, labels } = useMessages();
   const { data, isLoading, isFetched, error } = useEventDataProperties(websiteId);
   const { data: values } = useEventDataValues(websiteId, eventName, propertyName);
+
+  // 过滤数据 - 支持事件名称和属性名称的模糊搜索
+  const filteredData = useMemo(() => {
+    if (!data || !search) return data;
+
+    return data.filter(
+      item =>
+        item.eventName.toLowerCase().includes(search.toLowerCase()) ||
+        item.propertyName.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [data, search]);
 
   const {
     viewMode,
@@ -51,28 +64,43 @@ export function EventProperties({
     onPropertyChange?.(row.propertyName);
   };
 
+  const handleSearch = (searchValue: string) => {
+    setSearch(searchValue);
+  };
+
   return (
     <LoadingPanel isLoading={isLoading} isFetched={isFetched} data={data} error={error}>
       <div className={styles.container}>
-        <GridTable data={data} cardMode={false} className={styles.table}>
-          <GridColumn name="eventName" label={formatMessage(labels.event)}>
-            {row => (
-              <div className={styles.link} onClick={() => handleRowClick(row)}>
-                {row.eventName}
-              </div>
-            )}
-          </GridColumn>
-          <GridColumn name="propertyName" label={formatMessage(labels.property)}>
-            {row => (
-              <div className={styles.link} onClick={() => handleRowClick(row)}>
-                {row.propertyName}
-              </div>
-            )}
-          </GridColumn>
-          <GridColumn name="total" label={formatMessage(labels.count)} alignment="end" />
-        </GridTable>
+        <div className={styles.tableSection}>
+          <div className={styles.searchSection}>
+            <SearchField
+              className={styles.searchField}
+              value={search}
+              onSearch={handleSearch}
+              delay={300}
+              placeholder="搜索事件"
+            />
+          </div>
+          <GridTable data={filteredData} cardMode={false} className={styles.table}>
+            <GridColumn name="eventName" label={formatMessage(labels.event)}>
+              {row => (
+                <div className={styles.link} onClick={() => handleRowClick(row)}>
+                  {row.eventName}
+                </div>
+              )}
+            </GridColumn>
+            <GridColumn name="propertyName" label={formatMessage(labels.property)}>
+              {row => (
+                <div className={styles.link} onClick={() => handleRowClick(row)}>
+                  {row.propertyName}
+                </div>
+              )}
+            </GridColumn>
+            <GridColumn name="total" label={formatMessage(labels.count)} alignment="end" />
+          </GridTable>
+        </div>
 
-        {propertyName && (
+        {eventName && propertyName && (
           <div className={styles.chart}>
             <div className={styles.header}>
               <div className={styles.title}>
@@ -121,7 +149,7 @@ export function EventProperties({
               </div>
             )}
 
-            {totalItems > 25 && (
+            {values && values.length > 0 && (
               <PropertyChartPagination
                 currentPage={currentPage}
                 totalPages={totalPages}
