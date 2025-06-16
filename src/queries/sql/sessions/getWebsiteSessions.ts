@@ -54,13 +54,13 @@ async function relationalQuery(websiteId: string, filters: QueryFilters, pagePar
     ${filterQuery}
     ${
       search
-        ? `and (session.distinct_id ${like} {{search}}
-           or city ${like} {{search}}
-           or browser ${like} {{search}}
-           or os ${like} {{search}}
-           or device ${like} {{search}}
-           or user_name.string_value ${like} {{search}}
-           or org_name.string_value ${like} {{search}})`
+        ? `and (COALESCE(session.distinct_id, '') ${like} {{search}}
+           or COALESCE(city, '') ${like} {{search}}
+           or COALESCE(browser, '') ${like} {{search}}
+           or COALESCE(os, '') ${like} {{search}}
+           or COALESCE(device, '') ${like} {{search}}
+           or COALESCE(user_name.string_value, '') ${like} {{search}}
+           or COALESCE(org_name.string_value, '') ${like} {{search}})`
         : ''
     }
     group by session.session_id, 
@@ -130,13 +130,13 @@ async function clickhouseQuery(websiteId: string, filters: QueryFilters, pagePar
     ${filterQuery}
     ${
       search
-        ? `and ((positionCaseInsensitive(s.distinct_id, {search:String}) > 0)
-           or (positionCaseInsensitive(s.city, {search:String}) > 0)
-           or (positionCaseInsensitive(s.browser, {search:String}) > 0)
-           or (positionCaseInsensitive(s.os, {search:String}) > 0)
-           or (positionCaseInsensitive(s.device, {search:String}) > 0)
-           or (positionCaseInsensitive(user_name.string_value, {search:String}) > 0)
-           or (positionCaseInsensitive(org_name.string_value, {search:String}) > 0))`
+        ? `and ((positionCaseInsensitive(ifNull(s.distinct_id, ''), {search:String}) > 0)
+           or (positionCaseInsensitive(ifNull(s.city, ''), {search:String}) > 0)
+           or (positionCaseInsensitive(ifNull(s.browser, ''), {search:String}) > 0)
+           or (positionCaseInsensitive(ifNull(s.os, ''), {search:String}) > 0)
+           or (positionCaseInsensitive(ifNull(s.device, ''), {search:String}) > 0)
+           or (positionCaseInsensitive(ifNull(user_name.string_value, ''), {search:String}) > 0)
+           or (positionCaseInsensitive(ifNull(org_name.string_value, ''), {search:String}) > 0))`
         : ''
     }
     group by s.session_id, s.website_id, s.distinct_id, s.hostname, s.browser, s.os, s.device, s.screen, s.language, s.country, s.region, s.city, user_name.string_value, org_name.string_value
