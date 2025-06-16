@@ -102,7 +102,7 @@ export function SessionProperties({ websiteId }: { websiteId: string }) {
               </div>
             )}
 
-            {data.length > 25 && (
+            {totalItems > 25 && (
               <PropertyChartPagination
                 currentPage={currentPage}
                 totalPages={totalPages}

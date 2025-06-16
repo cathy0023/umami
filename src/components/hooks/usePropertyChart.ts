@@ -55,6 +55,14 @@ export function usePropertyChart({
   // 图表配置
   const chartOptions = useMemo(
     () => ({
+      layout: {
+        padding: {
+          top: 40, // 增加顶部边距以显示数值标签
+          bottom: 10,
+          left: 10,
+          right: 10,
+        },
+      },
       plugins: {
         legend: {
           display: false,
