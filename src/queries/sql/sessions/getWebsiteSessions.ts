@@ -28,6 +28,7 @@ async function relationalQuery(websiteId: string, filters: QueryFilters, pagePar
     select
       session.session_id as "id",
       session.website_id as "websiteId",
+      session.distinct_id as "distinctId",
       website_event.hostname,
       session.browser,
       session.os,
@@ -53,15 +54,18 @@ async function relationalQuery(websiteId: string, filters: QueryFilters, pagePar
     ${filterQuery}
     ${
       search
-        ? `and (distinct_id ${like} {{search}}
+        ? `and (session.distinct_id ${like} {{search}}
            or city ${like} {{search}}
            or browser ${like} {{search}}
            or os ${like} {{search}}
-           or device ${like} {{search}})`
+           or device ${like} {{search}}
+           or user_name.string_value ${like} {{search}}
+           or org_name.string_value ${like} {{search}})`
         : ''
     }
     group by session.session_id, 
       session.website_id, 
+      session.distinct_id,
       website_event.hostname, 
       session.browser, 
       session.os, 
@@ -93,6 +97,7 @@ async function clickhouseQuery(websiteId: string, filters: QueryFilters, pagePar
     select
       s.session_id as id,
       s.website_id as websiteId,
+      s.distinct_id as distinctId,
       s.hostname,
       s.browser,
       s.os,
@@ -125,14 +130,16 @@ async function clickhouseQuery(websiteId: string, filters: QueryFilters, pagePar
     ${filterQuery}
     ${
       search
-        ? `and ((positionCaseInsensitive(distinct_id, {search:String}) > 0)
-           or (positionCaseInsensitive(city, {search:String}) > 0)
-           or (positionCaseInsensitive(browser, {search:String}) > 0)
-           or (positionCaseInsensitive(os, {search:String}) > 0)
-           or (positionCaseInsensitive(device, {search:String}) > 0))`
+        ? `and ((positionCaseInsensitive(s.distinct_id, {search:String}) > 0)
+           or (positionCaseInsensitive(s.city, {search:String}) > 0)
+           or (positionCaseInsensitive(s.browser, {search:String}) > 0)
+           or (positionCaseInsensitive(s.os, {search:String}) > 0)
+           or (positionCaseInsensitive(s.device, {search:String}) > 0)
+           or (positionCaseInsensitive(user_name.string_value, {search:String}) > 0)
+           or (positionCaseInsensitive(org_name.string_value, {search:String}) > 0))`
         : ''
     }
-    group by s.session_id, s.website_id, s.hostname, s.browser, s.os, s.device, s.screen, s.language, s.country, s.region, s.city, user_name.string_value, org_name.string_value
+    group by s.session_id, s.website_id, s.distinct_id, s.hostname, s.browser, s.os, s.device, s.screen, s.language, s.country, s.region, s.city, user_name.string_value, org_name.string_value
     order by lastAt desc
     limit 1000)
     select * from sessions

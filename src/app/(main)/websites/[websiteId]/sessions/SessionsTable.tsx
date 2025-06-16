@@ -22,7 +22,7 @@ export function SessionsTable({ data = [] }: { data: any[]; showDomain?: boolean
       <GridColumn name="user_name" label="用户名">
         {row => row.user_name || '-'}
       </GridColumn>
-      <GridColumn name="org_name" label="组织名称">
+      <GridColumn name="org_name" label="公司名">
         {row => row.org_name || '-'}
       </GridColumn>
       <GridColumn name="visits" label={formatMessage(labels.visits)} width="100px" />
