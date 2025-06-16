@@ -127,6 +127,32 @@ export function usePropertyChart({
       },
       animation: {
         duration: 400,
+        onComplete: function (animation: any) {
+          const chart = animation.chart;
+          const ctx = chart.ctx;
+
+          chart.data.datasets.forEach((dataset: any, datasetIndex: number) => {
+            const meta = chart.getDatasetMeta(datasetIndex);
+            if (!meta.hidden) {
+              meta.data.forEach((element: any, index: number) => {
+                const value = dataset.data[index];
+                const displayValue = typeof value === 'object' ? value.y : value;
+
+                if (displayValue > 0) {
+                  ctx.fillStyle = colors.chart.text;
+                  ctx.font = 'bold 12px Inter';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'bottom';
+
+                  const x = element.x;
+                  const y = element.y - 5;
+
+                  ctx.fillText(formatLongNumber(displayValue), x, y);
+                }
+              });
+            }
+          });
+        },
       },
     }),
     [colors, propertyName],
