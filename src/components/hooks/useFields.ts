@@ -1,9 +1,13 @@
 import { useMessages } from './useMessages';
+import { usePathname } from 'next/navigation';
 
 export function useFields() {
   const { formatMessage, labels } = useMessages();
+  const pathname = usePathname();
+  const isEventsPage = pathname?.includes('/events');
 
-  const fields = [
+  // 基本字段列表
+  const baseFields = [
     { name: 'url', type: 'string', label: formatMessage(labels.url) },
     { name: 'title', type: 'string', label: formatMessage(labels.pageTitle) },
     { name: 'referrer', type: 'string', label: formatMessage(labels.referrer) },
@@ -15,9 +19,13 @@ export function useFields() {
     { name: 'region', type: 'string', label: formatMessage(labels.region) },
     { name: 'city', type: 'string', label: formatMessage(labels.city) },
     { name: 'host', type: 'string', label: formatMessage(labels.host) },
-    { name: 'event', type: 'string', label: formatMessage(labels.event) },
     { name: 'tag', type: 'string', label: formatMessage(labels.tag) },
   ];
+
+  // 只有在events页面才添加event字段
+  const fields = isEventsPage
+    ? [...baseFields, { name: 'event', type: 'string', label: formatMessage(labels.event) }]
+    : baseFields;
 
   return { fields };
 }
