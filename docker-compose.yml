@@ -3,32 +3,15 @@ services:
   umami:
     image: ghcr.io/umami-software/umami:postgresql-latest
     ports:
-      - "3000:3000"
+      - "3004:3000"
     environment:
-      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      DATABASE_URL: postgresql://neondb_owner:npg_CQhz4yuvfUn5@ep-tiny-snow-a8gw7f0b-pooler.eastus2.azure.neon.tech/neondb?sslmode=require
       DATABASE_TYPE: postgresql
-      APP_SECRET: replace-me-with-a-random-string
-    depends_on:
-      db:
-        condition: service_healthy
+      APP_SECRET: 747db80fef94d2d565ac51e01caeaa6f07419e41520a0a513ce745d8675a2b1a
     init: true
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "curl http://localhost:3000/api/heartbeat"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-  db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: umami
-      POSTGRES_USER: umami
-      POSTGRES_PASSWORD: umami
-    volumes:
-      - umami-db-data:/var/lib/postgresql/data
-    restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
