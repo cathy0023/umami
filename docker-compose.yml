@@ -5,7 +5,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      DATABASE_URL: postgresql://neondb_owner:npg_CQhz4yuvfUn5@ep-tiny-snow-a8gw7f0b-pooler.eastus2.azure.neon.tech/neondb?sslmode=require
       DATABASE_TYPE: postgresql
       APP_SECRET: replace-me-with-a-random-string
     depends_on:
