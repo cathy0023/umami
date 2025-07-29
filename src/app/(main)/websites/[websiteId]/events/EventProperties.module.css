@@ -68,6 +68,10 @@
   font-size: 16px;
 }
 
+.data {
+  min-height: 620px;
+}
+
 .toggleButtons {
   display: flex;
   gap: 8px;

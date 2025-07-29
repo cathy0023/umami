@@ -1,8 +1,9 @@
+import { useState } from 'react';
+import { useMemo } from 'react';
 import { GridColumn, GridTable } from 'react-basics';
 import { useEventDataProperties, useEventDataValues, useMessages } from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import Chart from '@/components/charts/Chart';
-import { useState, useMemo } from 'react';
 import { usePropertyChart } from '@/components/hooks/usePropertyChart';
 import { PropertyChartPagination } from '@/components/common/PropertyChartPagination';
 import { SearchField } from 'react-basics';

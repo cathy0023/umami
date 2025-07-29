@@ -8,6 +8,8 @@ export function useFields() {
 
   // 基本字段列表
   const baseFields = [
+    // { name: 'cohort', type: 'string', label: formatMessage(labels.cohort) },
+    // { name: 'segment', type: 'string', label: formatMessage(labels.segment) },
     { name: 'url', type: 'string', label: formatMessage(labels.url) },
     { name: 'title', type: 'string', label: formatMessage(labels.pageTitle) },
     { name: 'referrer', type: 'string', label: formatMessage(labels.referrer) },

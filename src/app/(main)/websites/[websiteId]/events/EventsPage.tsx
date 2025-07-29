@@ -38,6 +38,11 @@ export default function EventsPage({ websiteId }) {
     setPropertyName(newPropertyName);
   };
 
+  // 添加onSelect函数
+  const onSelect = (value: any) => {
+    setTab(value);
+  };
+
   return (
     <>
       <WebsiteHeader websiteId={websiteId} />
@@ -77,11 +82,7 @@ export default function EventsPage({ websiteId }) {
         />
       </GridRow>
       <div>
-        <Tabs
-          selectedKey={tab}
-          onSelect={(value: any) => setTab(value)}
-          style={{ marginBottom: 30 }}
-        >
+        <Tabs selectedKey={tab} onSelect={onSelect} style={{ marginBottom: 30 }}>
           <Item key="activity">{formatMessage(labels.activity)}</Item>
           <Item key="properties">{formatMessage(labels.properties)}</Item>
         </Tabs>
