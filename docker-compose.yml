@@ -1,5 +1,8 @@
 ---
 services:
+  app:
+    env_file:
+      - .env
   umami:
     image: ghcr.io/umami-software/umami:postgresql-latest
     ports:

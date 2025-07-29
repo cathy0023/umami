@@ -15,7 +15,7 @@ export function WebsiteSelect({
 }) {
   const { formatMessage, labels, messages } = useMessages();
   const [search, setSearch] = useState('');
-  const [selectedId, setSelectedId] = useState<Key>(websiteId);
+  const [selectedId, setSelectedId] = useState<Key>(websiteId || '');
 
   const { data: website } = useWebsite(selectedId as string);
 
@@ -30,7 +30,7 @@ export function WebsiteSelect({
   };
 
   const handleSelect = (value: any) => {
-    setSelectedId(value);
+    setSelectedId(value || '');
     onSelect?.(value);
   };
 
@@ -42,7 +42,7 @@ export function WebsiteSelect({
     <Dropdown
       menuProps={{ className: styles.dropdown }}
       items={queryResult?.result?.data as any[]}
-      value={selectedId as string}
+      value={(selectedId as string) || ''}
       renderValue={renderValue}
       renderEmpty={renderEmpty}
       onChange={handleSelect}
