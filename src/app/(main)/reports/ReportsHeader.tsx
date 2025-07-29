@@ -3,7 +3,7 @@ import { Icon, Icons, Text } from 'react-basics';
 import { useLogin, useMessages, useTeamUrl } from '@/components/hooks';
 import LinkButton from '@/components/common/LinkButton';
 import { ROLES } from '@/lib/constants';
-import Calendar from '@/assets/calendar.svg';
+// import Calendar from '@/assets/calendar.svg';
 
 export function ReportsHeader() {
   const { formatMessage, labels } = useMessages();
@@ -14,12 +14,12 @@ export function ReportsHeader() {
   return (
     <PageHeader title={formatMessage(labels.reports)}>
       <div style={{ display: 'flex', gap: '10px' }}>
-        <LinkButton href={renderTeamUrl('/reports/weekly')} variant="secondary">
+        {/* <LinkButton href={renderTeamUrl('/reports/weekly')} variant="secondary">
           <Icon>
             <Calendar />
           </Icon>
           <Text>查看周报</Text>
-        </LinkButton>
+        </LinkButton> */}
         {canEdit && (
           <LinkButton href={renderTeamUrl('/reports/create')} variant="primary">
             <Icon>
