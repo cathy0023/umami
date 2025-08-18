@@ -280,6 +280,40 @@
   color: white;
 }
 
+/* 图表标题总数显示样式 */
+.totalCount {
+  display: inline;
+  color: var(--primary400);
+  font-weight: bold;
+  font-size: 0.9em;
+  margin-left: 8px;
+  opacity: 0.85;
+}
+
+/* 悬停效果 */
+.title:hover .totalCount {
+  opacity: 1;
+  color: var(--primary500);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .totalCount {
+    font-size: 0.85em;
+    margin-left: 6px;
+    display: block;
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .totalCount {
+    font-size: 0.8em;
+    margin-left: 0;
+    margin-top: 6px;
+  }
+}
+
 /* Tooltip 样式 - 已改用Chart.js内置tooltip
 .tooltip {
   padding: 12px 16px;

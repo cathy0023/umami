@@ -187,7 +187,8 @@ export default {
     defaultLocale,
   },
   basePath,
-  output: 'standalone',
+  // Disable standalone output to avoid symlink issues on Windows
+  // output: 'standalone',
   eslint: {
     ignoreDuringBuilds: true,
   },

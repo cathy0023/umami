@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { GridColumn, GridTable } from 'react-basics';
 import { useEventDataProperties, useEventDataValues, useMessages } from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
@@ -69,6 +68,35 @@ export function EventProperties({
     setSearch(searchValue);
   };
 
+  // 计算属性值总数
+  const totalCount = useMemo(() => {
+    if (!values || !Array.isArray(values) || values.length === 0) {
+      return 0;
+    }
+
+    return values.reduce((sum, item) => {
+      if (!item || typeof item !== 'object') {
+        return sum;
+      }
+
+      const total = Number(item.total);
+      if (isNaN(total) || total < 0) {
+        return sum;
+      }
+
+      return sum + total;
+    }, 0);
+  }, [values]);
+
+  // 渲染总数显示
+  const renderTotalCount = () => {
+    if (totalCount <= 0) {
+      return null;
+    }
+
+    return <span className={styles.totalCount}> 浏览次数 [{totalCount}]</span>;
+  };
+
   return (
     <LoadingPanel isLoading={isLoading} isFetched={isFetched} data={data} error={error}>
       <div className={styles.container}>
@@ -105,7 +133,7 @@ export function EventProperties({
           <div className={styles.chart}>
             <div className={styles.header}>
               <div className={styles.title}>
-                {eventName} （{propertyName}）
+                {eventName} （{propertyName}）{renderTotalCount()}
               </div>
               <div className={styles.toggleButtons}>
                 <button
