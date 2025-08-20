@@ -1,6 +1,11 @@
 import { useState, useMemo } from 'react';
 import { GridColumn, GridTable } from 'react-basics';
-import { useEventDataProperties, useEventDataValues, useMessages } from '@/components/hooks';
+import {
+  useEventDataProperties,
+  useEventDataValues,
+  useEventDataDetails,
+  useMessages,
+} from '@/components/hooks';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import Chart from '@/components/charts/Chart';
 import { usePropertyChart } from '@/components/hooks/usePropertyChart';
@@ -19,9 +24,26 @@ export function EventProperties({
   const [eventName, setEventName] = useState('');
   const [search, setSearch] = useState('');
 
+  // 详情模式状态
+  const [detailsViewMode, setDetailsViewMode] = useState<'chart' | 'list' | 'details'>('chart');
+  const [detailsPage, setDetailsPage] = useState(1);
+  const [detailsLimit, setDetailsLimit] = useState(25);
+
   const { formatMessage, labels } = useMessages();
   const { data, isLoading, isFetched, error } = useEventDataProperties(websiteId);
   const { data: values } = useEventDataValues(websiteId, eventName, propertyName);
+
+  // 详情数据获取 - 数据透视分析
+  const { data: detailsData, isLoading: detailsLoading } = useEventDataDetails(
+    websiteId,
+    eventName,
+    propertyName,
+    {
+      page: detailsPage,
+      limit: detailsLimit,
+      enabled: detailsViewMode === 'details' && !!(eventName && propertyName),
+    },
+  );
 
   // 过滤数据 - 支持事件名称和属性名称的模糊搜索
   const filteredData = useMemo(() => {
@@ -35,7 +57,6 @@ export function EventProperties({
   }, [data, search]);
 
   const {
-    viewMode,
     setViewMode,
     currentPage,
     totalPages,
@@ -57,10 +78,54 @@ export function EventProperties({
     initialItemsPerPage: 25,
   });
 
+  // 详情模式分页处理
+  const handleDetailsViewChange = (mode: 'chart' | 'list' | 'details') => {
+    if (mode === 'details') {
+      setDetailsViewMode('details');
+      setDetailsPage(1); // 重置详情分页
+    } else {
+      setDetailsViewMode(mode);
+      setViewMode(mode); // 同步到 usePropertyChart
+    }
+  };
+
+  const handleDetailsPrevPage = () => {
+    setDetailsPage(Math.max(1, detailsPage - 1));
+  };
+
+  const handleDetailsNextPage = () => {
+    if (detailsData?.pagination) {
+      setDetailsPage(Math.min(detailsData.pagination.pages, detailsPage + 1));
+    }
+  };
+
+  const handleDetailsPageClick = (page: number) => {
+    setDetailsPage(page);
+  };
+
+  const handleDetailsItemsPerPageChange = (limit: number) => {
+    setDetailsLimit(limit);
+    setDetailsPage(1); // 重置到第一页
+  };
+
+  // 属性名显示格式化
+  const getPropertyDisplayName = (propertyName: string) => {
+    const displayNames: Record<string, string> = {
+      user_name: '用户名',
+      org_name: '组织名',
+      click_type: '点击类型',
+      topic_name: '主题名称',
+    };
+    return displayNames[propertyName] || propertyName;
+  };
+
   const handleRowClick = row => {
     setEventName(row.eventName);
     setPropertyName(row.propertyName);
     resetPagination();
+    // 重置详情模式状态
+    setDetailsViewMode('chart');
+    setDetailsPage(1);
     onPropertyChange?.(row.propertyName);
   };
 
@@ -137,27 +202,39 @@ export function EventProperties({
               </div>
               <div className={styles.toggleButtons}>
                 <button
-                  className={`${styles.toggleButton} ${viewMode === 'chart' ? styles.active : ''}`}
-                  onClick={() => setViewMode('chart')}
+                  className={`${styles.toggleButton} ${
+                    detailsViewMode === 'chart' ? styles.active : ''
+                  }`}
+                  onClick={() => handleDetailsViewChange('chart')}
                 >
                   柱状图
                 </button>
                 <button
-                  className={`${styles.toggleButton} ${viewMode === 'list' ? styles.active : ''}`}
-                  onClick={() => setViewMode('list')}
+                  className={`${styles.toggleButton} ${
+                    detailsViewMode === 'list' ? styles.active : ''
+                  }`}
+                  onClick={() => handleDetailsViewChange('list')}
                 >
                   列表
+                </button>
+                <button
+                  className={`${styles.toggleButton} ${
+                    detailsViewMode === 'details' ? styles.active : ''
+                  }`}
+                  onClick={() => handleDetailsViewChange('details')}
+                >
+                  详情
                 </button>
               </div>
             </div>
 
-            {viewMode === 'chart' && chartData && (
+            {detailsViewMode === 'chart' && chartData && (
               <div className={styles.chartView}>
                 <Chart type="bar" data={chartData} chartOptions={chartOptions} />
               </div>
             )}
 
-            {viewMode === 'list' && (
+            {detailsViewMode === 'list' && (
               <div className={styles.listView}>
                 <div className={styles.listContainer}>
                   <div className={styles.listHeader}>
@@ -178,7 +255,77 @@ export function EventProperties({
               </div>
             )}
 
-            {values && values.length > 0 && (
+            {detailsViewMode === 'details' && (
+              <div className={styles.detailsView}>
+                {detailsLoading ? (
+                  <div className={styles.loading}>加载中...</div>
+                ) : detailsData?.data && detailsData.data.length > 0 ? (
+                  <div className={styles.detailsTable}>
+                    <div className={styles.detailsHeader}>
+                      {/* 第一列：选中属性名作为列标题 */}
+                      <div className={styles.detailsHeaderItem}>
+                        {getPropertyDisplayName(detailsData.selectedProperty)}
+                      </div>
+                      {/* 动态渲染其他属性列（排除选中的主属性） */}
+                      {detailsData.allProperties
+                        .filter(prop => prop !== detailsData.selectedProperty)
+                        .map(prop => (
+                          <div key={prop} className={styles.detailsHeaderItem}>
+                            {getPropertyDisplayName(prop)}
+                          </div>
+                        ))}
+                      <div className={styles.detailsHeaderCount}>触发次数</div>
+                    </div>
+                    <div className={styles.detailsBody}>
+                      {detailsData.data.map((row, index) => (
+                        <div key={index} className={styles.detailsRow}>
+                          {/* 第一列：选中属性的值 */}
+                          <div className={styles.detailsCell} title={row.selectedPropertyValue}>
+                            {row.selectedPropertyValue || '-'}
+                          </div>
+                          {/* 动态渲染其他属性值 */}
+                          {detailsData.allProperties
+                            .filter(prop => prop !== detailsData.selectedProperty)
+                            .map(prop => (
+                              <div
+                                key={prop}
+                                className={styles.detailsCell}
+                                title={row.otherProperties[prop] || '-'}
+                              >
+                                {row.otherProperties[prop] || '-'}
+                              </div>
+                            ))}
+                          <div className={styles.detailsCellCount}>{row.eventCount}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.emptyState}>暂无详情数据</div>
+                )}
+              </div>
+            )}
+
+            {/* 分页组件 - 根据当前模式显示对应的分页 */}
+            {detailsViewMode === 'details' && detailsData?.data && detailsData.data.length > 0 && (
+              <PropertyChartPagination
+                currentPage={detailsData.pagination.page}
+                totalPages={detailsData.pagination.pages}
+                totalItems={detailsData.pagination.total}
+                startIndex={(detailsData.pagination.page - 1) * detailsData.pagination.limit + 1}
+                endIndex={Math.min(
+                  detailsData.pagination.page * detailsData.pagination.limit,
+                  detailsData.pagination.total,
+                )}
+                itemsPerPage={detailsData.pagination.limit}
+                onPrevPage={handleDetailsPrevPage}
+                onNextPage={handleDetailsNextPage}
+                onPageClick={handleDetailsPageClick}
+                onItemsPerPageChange={handleDetailsItemsPerPageChange}
+              />
+            )}
+
+            {detailsViewMode !== 'details' && values && values.length > 0 && (
               <PropertyChartPagination
                 currentPage={currentPage}
                 totalPages={totalPages}

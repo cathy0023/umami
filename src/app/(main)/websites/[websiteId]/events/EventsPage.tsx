@@ -15,7 +15,7 @@ import { FILTER_COLUMNS } from '@/lib/constants';
 
 export default function EventsPage({ websiteId }) {
   const [label, setLabel] = useState(null);
-  const [tab, setTab] = useState('activity');
+  const [tab, setTab] = useState('properties');
   const [propertyName, setPropertyName] = useState('');
   const { formatMessage, labels } = useMessages();
   const { query } = useNavigation();
@@ -83,8 +83,8 @@ export default function EventsPage({ websiteId }) {
       </GridRow>
       <div>
         <Tabs selectedKey={tab} onSelect={onSelect} style={{ marginBottom: 30 }}>
-          <Item key="activity">{formatMessage(labels.activity)}</Item>
           <Item key="properties">{formatMessage(labels.properties)}</Item>
+          <Item key="activity">{formatMessage(labels.activity)}</Item>
         </Tabs>
         {tab === 'activity' && <EventsDataTable websiteId={websiteId} />}
         {tab === 'properties' && (

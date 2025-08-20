@@ -8,6 +8,7 @@ export * from '@/queries/sql/events/getEventDataEvents';
 export * from '@/queries/sql/events/getEventDataFields';
 export * from '@/queries/sql/events/getEventDataProperties';
 export * from '@/queries/sql/events/getEventDataValues';
+export * from '@/queries/sql/events/getEventDataDetails';
 export * from '@/queries/sql/events/getEventDataStats';
 export * from '@/queries/sql/events/getEventDataUsage';
 export * from '@/queries/sql/events/getEventMetrics';

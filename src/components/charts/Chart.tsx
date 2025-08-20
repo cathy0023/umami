@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo, ReactNode } from 'react';
 import { Loading } from 'react-basics';
 import classNames from 'classnames';
-import ChartJS, { LegendItem, ChartOptions } from 'chart.js/auto';
+import { LegendItem, ChartOptions } from 'chart.js/auto';
 import HoverTooltip from '@/components/common/HoverTooltip';
 import Legend from '@/components/metrics/Legend';
 import { DEFAULT_ANIMATION_DURATION } from '@/lib/constants';
@@ -64,7 +64,10 @@ export function Chart({
     };
   }, [chartOptions]);
 
-  const createChart = (data: any) => {
+  const createChart = async (data: any) => {
+    // 动态导入 Chart.js
+    const ChartJS = (await import('chart.js/auto')).default;
+
     ChartJS.defaults.font.family = 'Inter';
 
     chart.current = new ChartJS(canvas.current, {

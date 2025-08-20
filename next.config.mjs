@@ -209,6 +209,29 @@ export default {
       issuer: /\.(js|ts)x?$/,
       use: ['@svgr/webpack'],
     });
+
+    // 确保 Chart.js 正确处理
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+    };
+
+    // 优化 Chart.js 的打包
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        ...config.optimization.splitChunks,
+        cacheGroups: {
+          ...config.optimization.splitChunks?.cacheGroups,
+          chartjs: {
+            name: 'chartjs',
+            test: /[\\/]node_modules[\\/](chart\.js|chartjs-.*?)[\\/]/,
+            chunks: 'all',
+            priority: 20,
+          },
+        },
+      },
+    };
+
     return config;
   },
   async headers() {
