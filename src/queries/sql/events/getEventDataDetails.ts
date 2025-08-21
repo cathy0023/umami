@@ -30,6 +30,7 @@ export async function getEventDataDetails(
     propertyName: string;
     page?: number;
     limit?: number;
+    valueFilter?: string;
   },
 ): Promise<EventDetailsResponse> {
   return runQuery({
@@ -45,15 +46,26 @@ async function relationalQuery(
     propertyName: string;
     page?: number;
     limit?: number;
+    valueFilter?: string;
   },
 ): Promise<EventDetailsResponse> {
   const { rawQuery, parseFilters } = prisma;
-  const { eventName, propertyName, page = 1, limit = 25, ...queryFilters } = filters;
+  const { eventName, propertyName, page = 1, limit = 25, valueFilter, ...queryFilters } = filters;
 
   const offset = (page - 1) * limit;
 
   // 解析筛选条件
   const { filterQuery, cohortQuery, params } = await parseFilters(websiteId, queryFilters);
+
+  // 构建 valueFilter 条件 - 基于website_event表的tag字段筛选
+  const valueFilterQuery = valueFilter ? `AND we.tag ilike {{valueFilter}}` : '';
+
+  // 添加 valueFilter 参数
+  const queryParams = {
+    ...params,
+    eventName,
+    ...(valueFilter && { valueFilter: `%${valueFilter}%` }),
+  };
 
   try {
     // 获取所有属性名
@@ -67,9 +79,10 @@ async function relationalQuery(
         AND we.created_at BETWEEN {{startDate}} AND {{endDate}}
       ${cohortQuery}
       ${filterQuery}
+      ${valueFilterQuery}
       ORDER BY ed.data_key
       `,
-      { ...params, eventName },
+      queryParams,
     );
 
     const allProperties = Array.isArray(allPropsResult)
@@ -97,6 +110,7 @@ async function relationalQuery(
           AND ed.website_id = {{websiteId::uuid}}
         ${cohortQuery}
         ${filterQuery}
+        ${valueFilterQuery}
       ),
       -- 将每个事件的属性转为行格式
       pivoted_events AS (
@@ -162,7 +176,7 @@ async function relationalQuery(
       ORDER BY event_count DESC, selected_property_value
       LIMIT {{limit}} OFFSET {{offset}}
       `,
-      { ...params, eventName, propertyName, limit, offset },
+      { ...queryParams, propertyName, limit, offset },
     );
 
     // 获取总数
@@ -186,6 +200,7 @@ async function relationalQuery(
           AND ed.website_id = {{websiteId::uuid}}
         ${cohortQuery}
         ${filterQuery}
+        ${valueFilterQuery}
       ),
       pivoted_events AS (
         SELECT 
@@ -236,7 +251,7 @@ async function relationalQuery(
       )) as total
       FROM property_combinations
       `,
-      { ...params, eventName, propertyName },
+      { ...queryParams, propertyName },
     );
 
     const total = parseInt(countResult[0]?.total || '0');
@@ -276,15 +291,27 @@ async function clickhouseQuery(
     propertyName: string;
     page?: number;
     limit?: number;
+    valueFilter?: string;
   },
 ): Promise<EventDetailsResponse> {
   const { rawQuery, parseFilters } = clickhouse;
-  const { eventName, propertyName, page = 1, limit = 25, ...queryFilters } = filters;
+  const { eventName, propertyName, page = 1, limit = 25, valueFilter, ...queryFilters } = filters;
 
   const offset = (page - 1) * limit;
 
   // 解析筛选条件
   const { filterQuery, params } = await parseFilters(websiteId, queryFilters);
+
+  // 添加 valueFilter 参数
+  // TODO: 完整实现ClickHouse详情查询的valueFilter支持
+  const queryParams = {
+    ...params,
+    eventName,
+    propertyName,
+    limit,
+    offset,
+    ...(valueFilter && { valueFilter }),
+  };
 
   try {
     // 获取所有属性名
@@ -298,7 +325,7 @@ async function clickhouseQuery(
         ${filterQuery}
       ORDER BY data_key
       `,
-      { ...params, eventName },
+      { ...queryParams },
     );
 
     const allProperties = Array.isArray(allPropsResult)
@@ -347,7 +374,7 @@ async function clickhouseQuery(
       ORDER BY event_count DESC
       LIMIT {limit:UInt32} OFFSET {offset:UInt32}
       `,
-      { ...params, eventName, propertyName, limit, offset },
+      { ...queryParams, propertyName, limit, offset },
     );
 
     // 获取总数
@@ -382,7 +409,7 @@ async function clickhouseQuery(
       FROM pivoted_sessions
       WHERE arrayExists(x -> tupleElement(x, 1) = {propertyName:String}, properties_array)
       `,
-      { ...params, eventName, propertyName },
+      { ...queryParams, propertyName },
     );
 
     const total = parseInt(countResult[0]?.total || '0');

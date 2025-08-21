@@ -26,6 +26,7 @@ export interface UseEventDataDetailsOptions
   extends Omit<UseQueryOptions<EventDetailsResponse>, 'queryKey' | 'queryFn'> {
   page?: number;
   limit?: number;
+  companyFilter?: string;
 }
 
 export function useEventDataDetails(
@@ -36,7 +37,17 @@ export function useEventDataDetails(
 ) {
   const { get, useQuery } = useApi();
   const params = useFilterParams(websiteId);
-  const { page = 1, limit = 25, ...queryOptions } = options;
+  const { page = 1, limit = 25, companyFilter, ...queryOptions } = options;
+
+  // 构建包含公司筛选的参数
+  const queryParams = {
+    ...params,
+    eventName,
+    propertyName,
+    page: page.toString(),
+    limit: limit.toString(),
+    ...(companyFilter && companyFilter.trim() && { valueFilter: companyFilter.trim() }),
+  };
 
   return useQuery<EventDetailsResponse>({
     queryKey: [
@@ -47,17 +58,11 @@ export function useEventDataDetails(
         propertyName,
         page,
         limit,
+        companyFilter,
         ...params,
       },
     ],
-    queryFn: () =>
-      get(`/websites/${websiteId}/event-data/details`, {
-        ...params,
-        eventName,
-        propertyName,
-        page: page.toString(),
-        limit: limit.toString(),
-      }),
+    queryFn: () => get(`/websites/${websiteId}/event-data/details`, queryParams),
     enabled: !!(websiteId && eventName && propertyName),
     ...queryOptions,
   });

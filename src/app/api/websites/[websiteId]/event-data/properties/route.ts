@@ -13,6 +13,7 @@ export async function GET(
     startAt: z.coerce.number().int(),
     endAt: z.coerce.number().int(),
     propertyName: z.string().optional(),
+    valueFilter: z.string().optional(),
     ...filterParams,
   });
 
@@ -23,7 +24,7 @@ export async function GET(
   }
 
   const { websiteId } = await params;
-  const { startAt, endAt, propertyName } = query;
+  const { startAt, endAt, propertyName, valueFilter } = query;
 
   if (!(await canViewWebsite(auth, websiteId))) {
     return unauthorized();
@@ -36,6 +37,7 @@ export async function GET(
     startDate,
     endDate,
     propertyName,
+    valueFilter,
     ...getRequestFilters(query),
   });
 

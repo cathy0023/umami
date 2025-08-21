@@ -16,6 +16,7 @@ export async function GET(
     propertyName: z.string(),
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(25),
+    valueFilter: z.string().optional(),
     ...filterParams,
   });
 
@@ -26,7 +27,7 @@ export async function GET(
   }
 
   const { websiteId } = await params;
-  const { startAt, endAt, eventName, propertyName, page, limit } = query;
+  const { startAt, endAt, eventName, propertyName, page, limit, valueFilter } = query;
 
   if (!(await canViewWebsite(auth, websiteId))) {
     return unauthorized();
@@ -42,6 +43,7 @@ export async function GET(
       propertyName,
       page,
       limit,
+      valueFilter,
       ...requestFilters,
     });
 
